@@ -1,8 +1,4 @@
-import { BNetPath } from '../utils/bNetQuery'
-
-type ConnectedRealmLink = {
-    href: BNetPath
-}
+import { Link } from './link'
 
 export type LocalizedString = {
     it_IT: string
@@ -19,13 +15,11 @@ export type LocalizedString = {
     de_DE: string
 }
 
-type Links = {
-    self: ConnectedRealmLink
-}
-
 export type ConnectedRealmsList = {
-    _links: Links
-    connected_realms: ConnectedRealmLink[]
+    _links: {
+        self: Link
+    }
+    connected_realms: Link[]
 }
 
 type Status = {
@@ -39,8 +33,8 @@ type Population = {
 }
 
 type Region = {
-    key: ConnectedRealmLink
-    name: string
+    key: Link
+    name: string | LocalizedString
     id: number
 }
 
@@ -52,7 +46,7 @@ type RealmType = {
 type Realm = {
     id: number
     region: Region
-    connected_realm: ConnectedRealmLink
+    connected_realm: Link
     name: string | LocalizedString
     category: string
     locale: string
@@ -64,19 +58,19 @@ type Realm = {
 
 export type ConnectedRealm = {
     _links: {
-        self: ConnectedRealmLink
+        self: Link
     }
     id: number
     has_queue: boolean
     status: Status
     population: Population
     realms: Realm[]
-    mythic_leaderboards: ConnectedRealmLink
-    auctions: ConnectedRealmLink
+    mythic_leaderboards: Link
+    auctions: Link
 }
 
 type ConnectedRealmResult = {
-    key: ConnectedRealmLink
+    key: Link
     data: ConnectedRealm
 }
 

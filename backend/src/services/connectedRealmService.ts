@@ -1,5 +1,7 @@
 import { bNetPathBuilder, executeBNetQuery } from '../utils/bNetQuery'
-import { ConnectedRealm, ConnectedRealmsList, LocalizedString, PaginatedConnectedRealms } from '../types/connectedRealm'
+import { ConnectedRealm, ConnectedRealmsList, PaginatedConnectedRealms } from '../types/bnet/connectedRealm'
+import { getLocalisedString } from '../utils/localisationUtils'
+
 export const getConnectRealmsIndex = async (): Promise<ConnectedRealmsList> => {
     return executeBNetQuery<ConnectedRealmsList>(bNetPathBuilder(`/connected-realm/index`))
         .then((data) => {
@@ -29,9 +31,7 @@ export const getConnectedRealmNames = async (): Promise<string[]> => {
         .then((paginatedConnectedRealms) => {
             return paginatedConnectedRealms.results
                 .map((connectedRealm) =>
-                    connectedRealm.data.realms
-                        .filter((value) => !value.is_tournament)
-                        .map((realm) => getLocalisedString(realm.name))
+                    connectedRealm.data.realms.map((realm) => `${getLocalisedString(realm.name)} - ${realm.id}`)
                 )
                 .flatMap((realmNames) => realmNames)
         })
@@ -41,10 +41,15 @@ export const getConnectedRealmNames = async (): Promise<string[]> => {
         })
 }
 
-export const getLocalisedString = (localizedString: string | LocalizedString): string => {
-    if (typeof localizedString === 'string') {
-        return localizedString
-    }
-
-    return localizedString.en_GB
+export const getConnectedRealmIDs = async (): Promise<number[]> => {
+    return executeBNetQuery<PaginatedConnectedRealms>(
+        bNetPathBuilder(`/search/connected-realm`, new URLSearchParams({ orderby: 'id' }))
+    )
+        .then((paginatedConnectedRealms) => {
+            return paginatedConnectedRealms.results.map((connectedRealm) => connectedRealm.data.id)
+        })
+        .catch((error) => {
+            console.error('Error fetching rate limit data:', error)
+            return Promise.reject(error)
+        })
 }

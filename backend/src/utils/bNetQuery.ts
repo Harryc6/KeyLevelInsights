@@ -1,14 +1,15 @@
 import { getValidBNetAccessToken } from './token'
 import axios, { isAxiosError } from 'axios'
+import { BNetPath } from '../types/bnet/link'
 
 type NamespaceCategory = 'static' | 'dynamic' | 'profile'
 type Region = 'us' | 'eu' | 'kr' | 'tw' | 'cn'
 type Namespace = `${NamespaceCategory}-${Region}`
 type Locale = 'en_GB' | 'es_ES' | 'fr_FR' | 'ru_RU' | 'de_DE' | 'pt_PT' | 'it_IT'
-export type BNetPath = string & { __brand: 'BNetPath' }
 
 export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
     const token = await getValidBNetAccessToken()
+    console.log(`Executing BNet query: ${path}`)
     return axios
         .get<T>(path, {
             headers: {
@@ -36,9 +37,11 @@ export function bNetPathBuilder(
     const subdomain = region
     const domain = 'api.blizzard.com'
     const subdirectory = 'data/wow' + (path.startsWith('/') ? path : '/' + path)
-    const pathParams = new URLSearchParams({ namespace, locale, ...params })
+    const pathParams = new URLSearchParams({ namespace, locale })
+    params.forEach((value, key) => {
+        pathParams.append(key, value)
+    })
 
+    // build the path
     return `${schema}://${subdomain}.${domain}/${subdirectory}?${pathParams.toString()}` as BNetPath
-
-    // return `https://${region}.api.blizzard.com/data/wow${path.startsWith('/') ? path : '/' + path}?namespace=${namespace}&locale=${locale}${pathParams.toString() ?? `&${pathParams.toString()}`}` as BNetPath
 }

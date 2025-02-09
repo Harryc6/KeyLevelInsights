@@ -1,5 +1,10 @@
 import { Request, Response } from 'express'
-import { getConnectedRealmByID, getConnectedRealmNames, getConnectRealmsIndex } from '../services/connectedRealmService'
+import {
+    getConnectedRealmByID,
+    getConnectedRealmIDs,
+    getConnectedRealmNames,
+    getConnectRealmsIndex,
+} from '../services/connectedRealmService'
 
 export const fetchConnectedRealms = async (req: Request, res: Response): Promise<void> => {
     return getConnectRealmsIndex()
@@ -31,6 +36,17 @@ export const fetchConnectedRealmNames = async (req: Request, res: Response): Pro
         })
         .catch((error) => {
             res.status(500).json({ error: 'Failed to fetch connected realm names' })
+            Promise.reject(error)
+        })
+}
+
+export const fetchConnectedRealmIDs = async (req: Request, res: Response): Promise<void> => {
+    return getConnectedRealmIDs()
+        .then((realmIDs) => {
+            res.json(realmIDs)
+        })
+        .catch((error) => {
+            res.status(500).json({ error: 'Failed to fetch connected realm IDs' })
             Promise.reject(error)
         })
 }

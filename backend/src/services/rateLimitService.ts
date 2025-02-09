@@ -1,6 +1,6 @@
 import { RateLimit } from '../models/rateLimit'
 import { executeWCLQuery } from '../utils/wclQuery'
-import { RateLimitData } from '../types/rateLimitData'
+import { RateLimitData } from '../types/wcl/rateLimitData'
 
 const rateLimitQuery = `
     {

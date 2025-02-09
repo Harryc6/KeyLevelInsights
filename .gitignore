@@ -5,3 +5,4 @@
 *.graphql
 .env
 package-lock.json
+*.db
