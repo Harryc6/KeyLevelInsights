@@ -9,7 +9,8 @@ type Locale = 'en_GB' | 'es_ES' | 'fr_FR' | 'ru_RU' | 'de_DE' | 'pt_PT' | 'it_IT
 
 export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
     const token = await getValidBNetAccessToken()
-    console.log(`Executing BNet query: ${path}`)
+    // uncomment the following line to see the BNet query being executed
+    // console.debug(`Executing BNet query: ${path}`)
     return axios
         .get<T>(path, {
             headers: {

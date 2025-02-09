@@ -34,7 +34,7 @@ type Specialization = {
     id: number
 }
 
-type Member = {
+export type Member = {
     profile: Profile
     faction: Faction
     specialization: Specialization
