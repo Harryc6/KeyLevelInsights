@@ -8,6 +8,8 @@ export const dungeonMap = new Map<number, string>([
     [375, 'Mist Of Tirna Scithe'],
 ])
 
+export const dungeonIDs = Array.from(dungeonMap.keys())
+
 export const tankSpecMap = new Map<number, string>([
     [66, 'Protection - Paladin'],
     [268, 'Brewmaster - Monk'],
@@ -16,6 +18,8 @@ export const tankSpecMap = new Map<number, string>([
     [250, 'Blood - Death Knight'],
     [581, 'Vengeance - Demon Hunter'],
 ])
+
+export const tankIDs = Array.from(tankSpecMap.keys())
 
 export const healerSpecMap = new Map<number, string>([
     [270, 'Mistweaver - Monk'],
@@ -26,6 +30,8 @@ export const healerSpecMap = new Map<number, string>([
     [1468, 'Preservation - Evoker'],
     [105, 'Restoration - Druid'],
 ])
+
+export const healerIDs = Array.from(healerSpecMap.keys())
 
 export const dpsSpecMap = new Map<number, string>([
     [263, 'Enhancement - Shaman'],
@@ -55,3 +61,5 @@ export const dpsSpecMap = new Map<number, string>([
     [262, 'Elemental - Shaman'],
     [267, 'Destruction - Warlock'],
 ])
+
+export const dpsIDs = Array.from(dpsSpecMap.keys())

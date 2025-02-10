@@ -8,6 +8,7 @@ import mythicKeystoneRoutes from './routes/mythicKeystoneRoutes'
 import mythicLeaderboardRoutes from './routes/mythicLeaderboardRoutes'
 import { collectAndStoreRuns } from './services/dataCollectionService'
 import cron from 'node-cron'
+import keystoneFrequencyRoutes from './routes/keystoneFrequencyRoutes'
 
 // Load environment variables from .env file
 dotenv.config()
@@ -23,6 +24,9 @@ app.use('/api', rateLimitRoutes)
 app.use(`/api`, connectedRealmRoutes)
 app.use(`/api`, mythicKeystoneRoutes)
 app.use(`/api`, mythicLeaderboardRoutes)
+
+// KLI routes
+app.use(`/api`, keystoneFrequencyRoutes)
 
 // Define a simple route to test the server
 app.get('/', (req: Request, res: Response) => {

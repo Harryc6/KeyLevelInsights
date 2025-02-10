@@ -3,14 +3,9 @@ import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
 import { insertCharacters, insertRuns } from './insertService'
 import Bottleneck from 'bottleneck'
-import { dpsSpecMap, dungeonMap, healerSpecMap, tankSpecMap } from '../types/kli/map'
+import { dpsIDs, dungeonIDs, dungeonMap, healerIDs, tankIDs } from '../types/kli/map'
 import { LeadingGroup, Member, MythicLeaderboardDetails } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
-
-const dungeonIDs = Array.from(dungeonMap.keys())
-const tankIDs = Array.from(tankSpecMap.keys())
-const healerIDs = Array.from(healerSpecMap.keys())
-const dpsIDs = Array.from(dpsSpecMap.keys())
 
 const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 1000 / 300 })
 const getMythicLeaderboardByDungeonAndPeriodLimited = limiter.wrap(getMythicLeaderboardByDungeonAndPeriod)
