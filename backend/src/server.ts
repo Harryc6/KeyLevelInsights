@@ -7,6 +7,7 @@ import connectedRealmRoutes from './routes/connectedRealmRoutes'
 import mythicKeystoneRoutes from './routes/mythicKeystoneRoutes'
 import mythicLeaderboardRoutes from './routes/mythicLeaderboardRoutes'
 import { collectAndStoreRuns } from './services/dataCollectionService'
+import cron from 'node-cron'
 
 // Load environment variables from .env file
 dotenv.config()
@@ -29,11 +30,11 @@ app.get('/', (req: Request, res: Response) => {
     Promise.resolve(val).then((val) => res.send(JSON.stringify(val, null, 2)))
 })
 
-// wait 5 seconds before starting data collection
-setTimeout(() => {
-    // Collect and store runs
+// Schedule a job to run collectAndStoreRuns() every hour
+cron.schedule('0 * * * *', () => {
+    console.log('Running collectAndStoreRuns() job...')
     collectAndStoreRuns()
-}, 5000)
+})
 
 // Start the server and listen on the specified port
 const PORT = parseInt(process.env.PORT || '5000')

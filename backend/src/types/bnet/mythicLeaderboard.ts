@@ -52,7 +52,7 @@ type MythicRating = {
     rating: number
 }
 
-type LeadingGroup = {
+export type LeadingGroup = {
     ranking: number
     duration: number
     completed_timestamp: number
