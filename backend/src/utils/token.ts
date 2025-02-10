@@ -94,15 +94,64 @@ export const getValidWCLAccessToken = async (): Promise<string> => {
     return token // Use existing token
 }
 
+// Cache object to store the token and its expiry time
+const tokenCache: { token: string | null; expiryTime: number } = {
+    token: null,
+    expiryTime: 0,
+}
+
+// Flag to prevent multiple token requests at the same time
+let isFetchingToken = false
+let tokenPromise: Promise<string> | null = null
+
 export const getValidBNetAccessToken = async (): Promise<string> => {
+    const currentTime = Date.now()
     const token = process.env.BNET_ACCESS_TOKEN
     const expiryTime = parseInt(process.env.BNET_TOKEN_EXPIRY || '0')
 
-    // Check if token is expired or missing
-    if (!token || Date.now() >= expiryTime) {
-        console.log('Battle.net Token expired or missing, fetching a new one...')
-        return await getBNetAccessToken() // Refresh token
+    // Check if token is cached and not expired
+    if (tokenCache.token && currentTime < tokenCache.expiryTime) {
+        return tokenCache.token
     }
 
-    return token // Use existing token
+    // Check if token is expired or missing
+    if (!tokenCache.token || currentTime >= tokenCache.expiryTime) {
+        if (!isFetchingToken) {
+            console.info('****************************************************************')
+            console.info('Battle.net Token expired or missing, fetching a new one...')
+            isFetchingToken = true
+            if (token && currentTime < expiryTime) {
+                tokenCache.token = token
+                tokenCache.expiryTime = expiryTime
+                tokenPromise = Promise.resolve(token)
+                console.info('Using valid token from environment variables')
+                console.info('****************************************************************')
+            } else {
+                tokenPromise = getBNetAccessToken()
+                    .then((newToken) => {
+                        // Reload .env variables
+                        dotenv.config()
+                        // Update the cache with the new token and expiry time
+                        tokenCache.token = newToken
+                        tokenCache.expiryTime = parseInt(process.env.BNET_TOKEN_EXPIRY || '0')
+                        return newToken
+                    })
+                    .catch((error) => {
+                        return Promise.reject(error)
+                    })
+                    .finally(() => {
+                        isFetchingToken = false
+                        tokenPromise = null
+                        console.info('****************************************************************')
+                    })
+            }
+        } else {
+            console.info('****************************************************************')
+            console.info('Waiting for token to be fetched...')
+            console.info('****************************************************************')
+        }
+        return tokenPromise!
+    }
+
+    return tokenCache.token // Use existing token
 }
