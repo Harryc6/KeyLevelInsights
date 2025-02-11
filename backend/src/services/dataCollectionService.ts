@@ -90,6 +90,7 @@ async function prepCharacterInsert(uniqueCharacters: Member[]) {
         character_id: member.profile.id,
         name: member.profile.name,
         realm: member.profile.realm.id,
+        spec: member.specialization.id,
     }))
 
     await insertCharacters(characters)

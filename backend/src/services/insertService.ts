@@ -54,12 +54,17 @@ export const insertCharacters = async (character: Character[]): Promise<void> =>
 
 async function insertCharacterBatch(batch: Character[]) {
     const query = `
-        INSERT INTO characters (character_id, name, realm)
-        VALUES ${batch.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3})`).join(', ')}
-            ON CONFLICT (character_id) DO NOTHING
+        INSERT INTO characters (character_id, name, realm, spec)
+        VALUES ${batch.map((_, i) => `($${i * 4 + 1}, $${i * 4 + 2}, $${i * 4 + 3}, $${i * 4 + 4})`).join(', ')}
+            ON CONFLICT (character_id, spec) DO NOTHING
     `
 
-    const values = batch.flatMap((character) => [character.character_id, character.name, character.realm])
+    const values = batch.flatMap((character) => [
+        character.character_id,
+        character.name,
+        character.realm,
+        character.spec,
+    ])
 
     try {
         const result = await pool.query(query, values)
