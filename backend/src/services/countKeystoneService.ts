@@ -5,54 +5,24 @@ import {
     FrequencyReport,
     KeystoneLevelFrequency,
     PeriodFrequencyReport,
+    SpecFrequencyReport,
 } from '../types/kli/KeyLevelFrequency'
 import { dungeonIDs } from '../types/kli/map'
 
-export const countRunsAtKeystoneLevel = async (keystoneLevel: number, period?: number): Promise<number> => {
+export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequencyReport[]> => {
     const query = `
-        SELECT COUNT(*) AS count
-        FROM runs
-        WHERE keystone_level = $1 ${period ? 'AND period = $2' : ''}
-    `
-    try {
-        const result = await pool.query(query, period ? [keystoneLevel, period] : [keystoneLevel])
-        return parseInt(result.rows[0].count, 10)
-    } catch (error) {
-        console.error('Error counting runs at keystone level:', error)
-        throw error
-    }
-}
-
-export const countRunsAtKeystoneLevelAndDungeon = async (
-    keystoneLevel: number,
-    dungeon: number,
-    period?: number
-): Promise<number> => {
-    const query = `
-        SELECT COUNT(*) AS count
-        FROM runs
-        WHERE keystone_level = $1 AND dungeon = $2 ${period ? 'AND period = $3' : ''}
-    `
-    try {
-        const result = await pool.query(query, period ? [keystoneLevel, dungeon, period] : [keystoneLevel, dungeon])
-        return parseInt(result.rows[0].count, 10)
-    } catch (error) {
-        console.error('Error counting runs at keystone level and dungeon:', error)
-        throw error
-    }
-}
-
-export const getHighestKeystoneLevel = async (period?: number): Promise<number> => {
-    const query = `
-        SELECT MAX(keystone_level) AS max
-        FROM runs
+        SELECT b.spec, a.keystone_level, count(a.keystone_level) as runs
+        FROM runs a
+        LEFT JOIN characters b ON b.character_id = ANY(a.tank) OR b.character_id = ANY(a.healer) OR b.character_id = ANY(a.dps)
         ${period ? 'WHERE period = $1' : ''}
+        GROUP BY b.spec, keystone_level
+        ORDER BY b.spec, keystone_level
     `
     try {
-        const result = await pool.query(query, period ? [period] : [])
-        return parseInt(result.rows[0].max)
+        const result = await pool.query<SpecFrequencyReport>(query, period ? [period] : [])
+        return result.rows
     } catch (error) {
-        console.error('Error fetching highest keystone level:', error)
+        console.error('Error fetching keystone report:', error)
         throw error
     }
 }
@@ -68,6 +38,21 @@ export const getKeystoneFrequencyReport = async (): Promise<FrequencyReport> => 
         currentPeriod: await getPeriodFrequencyReport(highestCurrentPeriodKeystone, currentPeriod),
         lastPeriod: await getPeriodFrequencyReport(highestLastPeriodKeystone, currentPeriod - 1),
         allPeriods: await getPeriodFrequencyReport(highestKeystone),
+    }
+}
+
+export const getHighestKeystoneLevel = async (period?: number): Promise<number> => {
+    const query = `
+        SELECT MAX(keystone_level) AS max
+        FROM runs
+        ${period ? 'WHERE period = $1' : ''}
+    `
+    try {
+        const result = await pool.query(query, period ? [period] : [])
+        return parseInt(result.rows[0].max)
+    } catch (error) {
+        console.error('Error fetching highest keystone level:', error)
+        throw error
     }
 }
 
@@ -95,10 +80,34 @@ const getDungeonFrequency = async (highestKeystone: number, period?: number): Pr
     for (const dungeon of dungeonIDs) {
         const byKeystoneLevel: KeystoneLevelFrequency[] = []
         for (let i = 2; i <= highestKeystone; i++) {
-            const runs = await countRunsAtKeystoneLevelAndDungeon(i, dungeon, period)
+            const runs = await countRunsAtKeystoneLevel(i, period, dungeon)
             byKeystoneLevel.push({ keystoneLevel: i, runs })
         }
         frequency.push({ byKeystoneLevel, dungeon })
     }
     return frequency
+}
+
+export const countRunsAtKeystoneLevel = async (
+    keystoneLevel: number,
+    period?: number,
+    dungeon?: number
+): Promise<number> => {
+    const query = `
+        SELECT COUNT(*) AS count
+        FROM runs
+        WHERE keystone_level = $1
+        ${dungeon ? 'AND dungeon = $2' : ''}
+        ${period ? `AND period = $${dungeon ? 3 : 2}` : ''}
+    `
+    try {
+        const params = [keystoneLevel]
+        if (dungeon) params.push(dungeon)
+        if (period) params.push(period)
+        const result = await pool.query(query, params)
+        return parseInt(result.rows[0].count)
+    } catch (error) {
+        console.error('Error counting runs:', error)
+        throw error
+    }
 }

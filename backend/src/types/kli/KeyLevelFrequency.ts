@@ -19,3 +19,9 @@ export type FrequencyReport = {
     lastPeriod: PeriodFrequencyReport
     allPeriods: PeriodFrequencyReport
 }
+
+export type SpecFrequencyReport = {
+    spec: string
+    keystone_level: number
+    runs: number
+}
