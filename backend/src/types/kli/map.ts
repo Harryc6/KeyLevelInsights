@@ -1,3 +1,97 @@
+export const specNames = [
+    // Tanks
+    'blood',
+    'brewmaster',
+    'guardian',
+    'protectionPaladin',
+    'protectionWarrior',
+    'vengeance',
+    // Healers
+    'discipline',
+    'holyPaladin',
+    'holyPriest',
+    'mistweaver',
+    'preservation',
+    'restorationDruid',
+    'restorationShaman',
+    // DPS
+    'affliction',
+    'arcane',
+    'arms',
+    'assassination',
+    'augmentation',
+    'balance',
+    'beastMastery',
+    'demonology',
+    'destruction',
+    'devastation',
+    'elemental',
+    'enhancement',
+    'feral',
+    'fire',
+    `frostDeathKnight`,
+    'frostMage',
+    'fury',
+    'havoc',
+    'marksmanship',
+    'outlaw',
+    'retribution',
+    'shadow',
+    'subtlety',
+    'survival',
+    'unholy',
+    'windwalker',
+] as const
+
+export type SpecName = (typeof specNames)[number]
+
+export const specIds = [
+    // Tanks
+    250, // Blood
+    268, // Brewmaster
+    104, // Guardian
+    66, // Protection Paladin
+    73, // Protection Warrior
+    581, // Vengeance
+    // Healers
+    256, // Discipline
+    65, // Holy Paladin
+    257, // Holy Priest
+    270, // Mistweaver
+    1468, // Preservation
+    105, // Restoration Druid
+    264, // Restoration Shaman
+    // DPS
+    265, // Affliction
+    62, // Arcane
+    71, // Arms
+    259, // Assassination
+    1473, // Augmentation
+    102, // Balance
+    253, // Beast Mastery
+    266, // Demonology
+    267, // Destruction
+    1467, // Devastation
+    262, // Elemental
+    263, // Enhancement
+    103, // Feral
+    63, // Fire
+    251, // Frost Death Knight
+    64, // Frost Mage
+    72, // Fury
+    577, // Havoc
+    254, // Marksmanship
+    260, // Outlaw
+    70, // Retribution
+    258, // Shadow
+    261, // Subtlety
+    255, // Survival
+    252, // Unholy
+    269, // Windwalker
+] as const
+
+export type SpecId = (typeof specIds)[number]
+
 export const dungeonMap = new Map<number, string>([
     [503, 'Ara Kara'],
     [501, 'Stonevault'],

@@ -1,4 +1,5 @@
-import { SpecId, specNames } from './map'
+import { useSuspenseQuery, UseSuspenseQueryResult } from '@tanstack/react-query'
+import useFetchData from './useFetchData.ts'
 
 export type KeystoneLevelFrequency = {
     keystoneLevel: number
@@ -22,16 +23,9 @@ export type FrequencyReport = {
     allPeriods: PeriodFrequencyReport
 }
 
-export type SpecFrequency = {
-    spec: SpecId
-    keystone_level: number
-    runs: number
-}
-
-type keystoneLevel = {
-    keystoneLevel: number
-}
-
-export type SpecFrequencyReport = keystoneLevel & {
-    [key in (typeof specNames)[number]]?: number
+export const useGetKeystoneFrequency = (): UseSuspenseQueryResult<FrequencyReport> => {
+    return useSuspenseQuery<FrequencyReport>({
+        queryKey: ['KeystoneFrequency'],
+        queryFn: () => useFetchData<FrequencyReport>('keystone-frequency'),
+    })
 }

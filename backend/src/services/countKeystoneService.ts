@@ -5,11 +5,11 @@ import {
     FrequencyReport,
     KeystoneLevelFrequency,
     PeriodFrequencyReport,
-    SpecFrequencyReport,
+    SpecFrequency,
 } from '../types/kli/KeyLevelFrequency'
 import { dungeonIDs } from '../types/kli/map'
 
-export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequencyReport[]> => {
+export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequency[]> => {
     const query = `
         SELECT b.spec, a.keystone_level, count(a.keystone_level) as runs
         FROM runs a
@@ -19,7 +19,7 @@ export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequ
         ORDER BY b.spec, keystone_level
     `
     try {
-        const result = await pool.query<SpecFrequencyReport>(query, period ? [period] : [])
+        const result = await pool.query<SpecFrequency>(query, period ? [period] : [])
         return result.rows
     } catch (error) {
         console.error('Error fetching keystone report:', error)
