@@ -1,4 +1,4 @@
-import { AppShell as MantineAppShell, Burger, Group, Skeleton, Stack } from '@mantine/core'
+import { AppShell as MantineAppShell, Burger, Group, Skeleton, Stack, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { FC } from 'react'
 import { ColorSchemeChanger } from './ColorSchemeChanger.tsx'
@@ -16,8 +16,8 @@ export const AppShell: FC = () => {
             <MantineAppShell.Header>
                 <Group h={'100%'} justify={'flex-start'} pl={15} pr={15}>
                     <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                    <Skeleton height={40} circle animate={false} />
-                    <strong>Key Level Insights</strong>
+                    <img src="/favicon-256x256.webp" alt="Logo" height={40} />
+                    <Title order={2}>Key Level Insights</Title>
                 </Group>
             </MantineAppShell.Header>
 
