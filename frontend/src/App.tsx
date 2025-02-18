@@ -10,8 +10,10 @@ function App() {
             <Routes>
                 <Route path="/" element={<AppShell />}>
                     <Route index element={<Home />} />
-                    {/*<Route path="blogs" element={<Blogs />} />*/}
-                    {/*<Route path="contact" element={<Contact />} />*/}
+                    <Route path="dps" element={<Home />} />
+                    <Route path="healers" element={<Home />} />
+                    <Route path="tanks" element={<Home />} />
+                    <Route path="dungeons" element={<NoPage />} />
                     <Route path="*" element={<NoPage />} />
                 </Route>
             </Routes>
