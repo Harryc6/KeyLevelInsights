@@ -3,6 +3,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { FC } from 'react'
 import { ColorSchemeChanger } from './ColorSchemeChanger.tsx'
 import { Outlet } from 'react-router'
+import { Navbar } from './Navbar.tsx'
 
 export const AppShell: FC = () => {
     const [opened, { toggle }] = useDisclosure()
@@ -24,6 +25,7 @@ export const AppShell: FC = () => {
             <MantineAppShell.Navbar p="sm">
                 <Stack justify={'space-between'} h={'100%'} align={'center'}>
                     {/* nav links */}
+                    <Navbar />
                     <Stack w={'100%'} gap={'sm'} align={'stretch'}>
                         {Array(15)
                             .fill(0)
