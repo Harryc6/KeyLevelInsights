@@ -8,167 +8,100 @@ import { TooltipProps } from 'recharts'
 export const Home: FC = () => {
     return (
         <Stack>
-            <Title order={2}>Spec Frequency</Title>
-            <Suspense fallback={<Skeleton h={595} w={640} ml={60} mb={5} />}>
-                <SpecFrequencyChart />
-            </Suspense>
-            <Title order={2}>DPS Frequency</Title>
-            <Suspense fallback={<Skeleton h={595} w={640} ml={60} mb={5} />}>
-                <DpsFrequencyChart />
-            </Suspense>
-            <Title order={2}>Healer Frequency</Title>
-            <Suspense fallback={<Skeleton h={595} w={640} ml={60} mb={5} />}>
-                <HealerFrequencyChart />
-            </Suspense>
-            <Title order={2}>Tank Frequency</Title>
-            <Suspense fallback={<Skeleton h={595} w={640} ml={60} mb={5} />}>
-                <TankFrequencyChart />
-            </Suspense>
-            <Title order={2}>Keystone Frequency</Title>
-            <Suspense fallback={<Skeleton h={450} w={650} ml={50} mb={50} />}>
-                <RunFrequencyChart />
-            </Suspense>
-            <Title order={2}>Dungeon Frequency</Title>
-            <Suspense fallback={<Skeleton h={450} w={650} ml={50} mb={50} />}>
-                <DungeonFrequencyChart />
-            </Suspense>
+            {['Spec', 'DPS', 'Healer', 'Tank', 'Keystone', 'Dungeon'].map((title, index) => (
+                <Stack key={index}>
+                    <Title order={2}>{title} Frequency</Title>
+                    <Suspense fallback={<Skeleton h={595} w={640} ml={60} mb={5} />}>
+                        {index < 4 ? (
+                            <SpecFrequencyChart type={title.toLowerCase()} />
+                        ) : (
+                            <FrequencyChart type={title.toLowerCase()} />
+                        )}
+                    </Suspense>
+                </Stack>
+            ))}
         </Stack>
     )
 }
 
-const RunFrequencyChart: FC = () => {
+const FrequencyChart: FC<{ type: string }> = ({ type }) => {
     const { data } = useGetKeystoneFrequency()
-
-    const byKeystoneLevel = data.allPeriods.byKeystoneLevel
-
+    const chartData =
+        type === 'keystone'
+            ? data.allPeriods.byKeystoneLevel
+            : data.allPeriods.byDungeon.map((d) => ({
+                  dungeon: d.dungeon,
+                  runs: d.byKeystoneLevel.reduce((acc, curr) => acc + curr.runs, 0),
+              }))
     return (
         <BarChart
             h={500}
             w={700}
-            data={byKeystoneLevel}
-            dataKey={'keystoneLevel'}
+            data={chartData}
+            dataKey={type === 'keystone' ? 'keystoneLevel' : 'dungeon'}
             series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
-            xAxisLabel={'Keystone Level'}
+            xAxisLabel={type === 'keystone' ? 'Keystone Level' : 'Dungeon'}
         />
     )
 }
 
-const DungeonFrequencyChart: FC = () => {
-    const { data } = useGetKeystoneFrequency()
-
-    // convert the data to a format that the BarChart component can use for rendering
-    const byKeystoneLevel = data.allPeriods.byDungeon.map((dungeon) => {
-        return {
-            dungeon: dungeon.dungeon,
-            runs: dungeon.byKeystoneLevel.reduce((acc, curr) => acc + curr.runs, 0),
-        }
-    })
-
-    return (
-        <BarChart
-            h={500}
-            w={700}
-            // type={'percent'}
-            data={byKeystoneLevel}
-            dataKey={'dungeon'}
-            series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
-            xAxisLabel={'Keystone Level'}
-        />
-    )
-}
-
-const DpsFrequencyChart: FC = () => {
+const SpecFrequencyChart: FC<{ type: string }> = ({ type }) => {
     const { data } = useGetSpecFrequency()
+    const series =
+        type === 'spec'
+            ? allSpecSeries
+            : type === 'dps'
+              ? dpsSpecSeries
+              : type === 'healer'
+                ? healerSpecSeries
+                : tankSpecSeries
     return (
         <BarChart
             h={600}
             w={700}
-            orientation={'vertical'}
+            orientation="vertical"
             withXAxis={false}
             yAxisProps={{ reversed: true }}
-            gridAxis={'none'}
-            type={'percent'}
+            gridAxis="none"
+            type="percent"
             data={data}
-            dataKey={'keystoneLevel'}
-            series={dpsSpecSeries}
-            tooltipProps={{
-                content: (props) => <ChartTooltip props={props} series={dpsSpecSeries} />,
-            }}
-        />
-    )
-}
-
-const HealerFrequencyChart: FC = () => {
-    const { data } = useGetSpecFrequency()
-    return (
-        <BarChart
-            h={600}
-            w={700}
-            orientation={'vertical'}
-            withXAxis={false}
-            yAxisProps={{ reversed: true }}
-            gridAxis={'none'}
-            type={'percent'}
-            data={data}
-            dataKey={'keystoneLevel'}
-            series={healerSpecSeries}
-            tooltipProps={{
-                content: (props) => <ChartTooltip props={props} series={healerSpecSeries} />,
-            }}
-        />
-    )
-}
-
-const TankFrequencyChart: FC = () => {
-    const { data } = useGetSpecFrequency()
-    return (
-        <BarChart
-            h={600}
-            w={700}
-            orientation={'vertical'}
-            withXAxis={false}
-            yAxisProps={{ reversed: true }}
-            gridAxis={'none'}
-            type={'percent'}
-            data={data}
-            dataKey={'keystoneLevel'}
-            series={tankSpecSeries}
-            tooltipProps={{
-                content: (props) => <ChartTooltip props={props} series={tankSpecSeries} />,
-            }}
-        />
-    )
-}
-
-const SpecFrequencyChart: FC = () => {
-    const { data } = useGetSpecFrequency()
-    return (
-        <BarChart
-            h={600}
-            w={700}
-            orientation={'vertical'}
-            withXAxis={false}
-            yAxisProps={{ reversed: true }}
-            gridAxis={'none'}
-            type={'percent'}
-            data={data}
-            dataKey={'keystoneLevel'}
-            series={allSpecSeries}
-            tooltipProps={{
-                content: (props) => <ChartTooltip props={props} series={allSpecSeries} />,
-            }}
+            dataKey="keystoneLevel"
+            series={series}
+            tooltipProps={{ content: (props) => <ChartTooltip props={props} series={series} /> }}
         />
     )
 }
 
 const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: ChartSeries[] }> = ({ props, series }) => {
-    if (!props.payload) {
-        return null
-    }
+    if (!props.payload) return null
+
+    const content = props.payload.map((item) => (
+        <Group key={item.payload + 'group'} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Group>
+                <svg height={12} width={12}>
+                    <circle
+                        key={item.payload + 'circle'}
+                        r={6}
+                        fill={item.color}
+                        width={12}
+                        height={12}
+                        cx={6}
+                        cy={6}
+                    />
+                </svg>
+                <Text size="sm" style={{ color: 'var(--mantine-color-text)' }}>
+                    {series.find((value) => value.name === item.name)?.label ?? item.name}
+                </Text>
+            </Group>
+            <Text size="sm" style={{ color: 'var(--mantine-color-bright)' }}>
+                {item.value}
+            </Text>
+        </Group>
+    ))
 
     return (
         <Paper withBorder style={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
-            <Text fw={500} pt={'xs'} pl={'md'} pr={'md'} style={{ color: 'var(--mantine-color-bright)' }}>
+            <Text fw={500} pt="xs" pl="md" pr="md" style={{ color: 'var(--mantine-color-bright)' }}>
                 Keystone Level: {props.label}
             </Text>
             <div
@@ -182,35 +115,7 @@ const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: ChartSerie
                     rowGap: 'calc(var(--mantine-spacing-sm) / 2)',
                 }}
             >
-                {props.payload.map((item) => (
-                    <Group
-                        key={item.payload + 'group'}
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <Group>
-                            <svg height={12} width={12}>
-                                <circle
-                                    key={item.payload + 'circle'}
-                                    r={6}
-                                    fill={item.color}
-                                    width={12}
-                                    height={12}
-                                    cx={6}
-                                    cy={6}
-                                />
-                            </svg>
-                            <Text size={'sm'} style={{ color: 'var(--mantine-color-text)' }}>
-                                {series.find((value) => value.name === item.name)?.label ?? item.name}
-                            </Text>
-                        </Group>
-                        <Text size={'sm'} style={{ color: 'var(--mantine-color-bright)' }}>
-                            {item.value}
-                        </Text>
-                    </Group>
-                ))}
+                {content}
             </div>
         </Paper>
     )
