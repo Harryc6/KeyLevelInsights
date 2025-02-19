@@ -7,13 +7,24 @@ import { dpsIDs, dungeonIDs, dungeonMap, healerIDs, tankIDs } from '../types/kli
 import { LeadingGroup, Member, MythicLeaderboardDetails } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
 
-const limiter = new Bottleneck({ maxConcurrent: 1, minTime: 1000 / 300 })
+export const updateAllExpansionsRuns = async () => {
+    // run from the start of the season (period 977) to the current period
+    const currentPeriod = await getCurrentPeriod()
+    const periods = Array.from({ length: currentPeriod - 977 }, (_, i) => currentPeriod - i)
+    for (const period of periods) {
+        await collectAndStoreRuns(period)
+    }
+}
+
+const limiter = new Bottleneck({ maxConcurrent: 20, minTime: 50 })
 const getMythicLeaderboardByDungeonAndPeriodLimited = limiter.wrap(getMythicLeaderboardByDungeonAndPeriod)
 
-export const collectAndStoreRuns = async () => {
+export const collectAndStoreRuns = async (period?: number) => {
     const [connectedRealmIDs, currentPeriod] = await Promise.all([getConnectedRealmIDs(), getCurrentPeriod()])
     await Promise.all(
-        dungeonIDs.map((dungeonID) => collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, currentPeriod))
+        dungeonIDs.map((dungeonID) =>
+            collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, period ?? currentPeriod)
+        )
     )
 }
 
