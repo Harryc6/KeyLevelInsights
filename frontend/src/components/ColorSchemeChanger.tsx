@@ -6,7 +6,7 @@ export const ColorSchemeChanger = () => {
 
     return (
         <ActionIcon
-            size="lg"
+            size={'lg'}
             color={colorScheme === 'dark' ? 'gray' : 'dark'}
             variant={colorScheme === 'dark' ? 'subtle' : 'subtle'}
             aria-label={colorScheme === 'dark' ? 'Light mode' : 'Dark mode'}

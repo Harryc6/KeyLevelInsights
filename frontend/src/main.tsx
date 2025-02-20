@@ -27,7 +27,7 @@ const persister = createSyncStoragePersister({
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-            <MantineProvider defaultColorScheme="auto">
+            <MantineProvider defaultColorScheme={'auto'}>
                 <App />
             </MantineProvider>
         </PersistQueryClientProvider>

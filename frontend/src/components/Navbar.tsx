@@ -24,6 +24,7 @@ export const Navbar: FC = () => {
                 onClick={() => navigate('/healers')}
                 label={'Healers'}
                 active={currentUrl.startsWith('/healers')}
+                // there is no suitable icon for healers, so improvise until going to a new icon library
                 leftSection={
                     <div style={{ position: 'relative', width: 20, height: 20 }}>
                         <IconCrop169
