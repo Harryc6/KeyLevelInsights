@@ -97,6 +97,7 @@ export const dungeonMap = new Map<number, string>([
     [501, 'Stonevault'],
     [505, 'Dawn Breaker'],
     [507, 'Grim Batol'],
+    [353, 'Siege Of Boralus'],
     [502, 'City Of Threads'],
     [376, 'Necrotic Wake'],
     [375, 'Mist Of Tirna Scithe'],

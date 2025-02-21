@@ -53,6 +53,7 @@ export const dungeonSeries = [
     { label: 'Stonevault', name: '501', color: '#b55d31' },
     { label: 'Dawnbreaker', name: '505', color: '#9e5ae1' },
     { label: 'Grim Batol', name: '507', color: '#995f7a' },
+    { label: 'Siege of Boralus', name: '353', color: '#b5792f' },
     { label: 'City Of Threads', name: '502', color: '#6d1a2e' },
     { label: 'Necrotic Wake', name: '376', color: '#2e6c4f' },
     { label: 'Mists Of Tirna Scithe', name: '375', color: '#2b38bc' },
