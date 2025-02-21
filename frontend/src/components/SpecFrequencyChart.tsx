@@ -7,7 +7,7 @@ import { allSpecSeries, dpsSpecSeries, healerSpecSeries, tankSpecSeries } from '
 
 export type DisplayType = 'Spec' | 'DPS' | 'Healer' | 'Tank'
 
-export const SpecFrequencyChart: FC<{ type: DisplayType }> = ({ type }) => {
+const SpecFrequencyChart: FC<{ type: DisplayType }> = ({ type }) => {
     const { data } = useGetSpecFrequency()
     const series =
         type === 'Spec'
@@ -20,7 +20,7 @@ export const SpecFrequencyChart: FC<{ type: DisplayType }> = ({ type }) => {
     return (
         <BarChart
             h={600}
-            w={700}
+            w={800}
             orientation={'vertical'}
             withXAxis={false}
             yAxisProps={{ reversed: true }}
@@ -33,6 +33,8 @@ export const SpecFrequencyChart: FC<{ type: DisplayType }> = ({ type }) => {
         />
     )
 }
+
+export default SpecFrequencyChart
 
 export const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: ChartSeries[] }> = ({ props, series }) => {
     if (!props.payload) return null

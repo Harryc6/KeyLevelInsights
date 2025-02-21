@@ -1,12 +1,14 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router'
-import { AppShell } from './components/AppShell.tsx'
 import { Home } from './pages/Home.tsx'
 import { NoPage } from './pages/NoPage.tsx'
 import { Dps } from './pages/Dps.tsx'
 import { Tanks } from './pages/Tanks.tsx'
 import { Healers } from './pages/Healers.tsx'
 import { Dungeons } from './pages/Dungeons.tsx'
+import { lazy } from 'react'
+
+const AppShell = lazy(() => import('./components/AppShell'))
 
 function App() {
     return (

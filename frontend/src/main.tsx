@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { MantineProvider } from '@mantine/core'
+import { createTheme, MantineProvider } from '@mantine/core'
 import { QueryClient } from '@tanstack/react-query'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
@@ -10,6 +10,16 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 // Import Mantine styles
 import '@mantine/core/styles.css'
 import '@mantine/charts/styles.css'
+
+const theme = createTheme({
+    breakpoints: {
+        xs: '30em',
+        sm: '64em',
+        md: '65em',
+        lg: '74em',
+        xl: '90em',
+    },
+})
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -27,7 +37,7 @@ const persister = createSyncStoragePersister({
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-            <MantineProvider defaultColorScheme={'auto'}>
+            <MantineProvider defaultColorScheme={'auto'} theme={theme}>
                 <App />
             </MantineProvider>
         </PersistQueryClientProvider>

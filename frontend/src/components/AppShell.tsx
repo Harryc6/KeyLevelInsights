@@ -5,7 +5,7 @@ import { ColorSchemeChanger } from './ColorSchemeChanger.tsx'
 import { Outlet, useNavigate } from 'react-router'
 import { Navbar } from './Navbar.tsx'
 
-export const AppShell: FC = () => {
+const AppShell: FC = () => {
     const [opened, { toggle }] = useDisclosure()
     const navigate = useNavigate()
 
@@ -40,3 +40,5 @@ export const AppShell: FC = () => {
         </MantineAppShell>
     )
 }
+
+export default AppShell

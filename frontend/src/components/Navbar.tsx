@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { NavLink, Stack } from '@mantine/core'
-import { IconCrop169, IconHome, IconHourglass, IconShield, IconSword } from '@tabler/icons-react'
+import { IconCrop169, IconHourglass, IconShield, IconSword } from '@tabler/icons-react'
 import { useNavigate } from 'react-router'
 
 export const Navbar: FC = () => {
@@ -8,12 +8,6 @@ export const Navbar: FC = () => {
     const navigate = useNavigate()
     return (
         <Stack gap={5} w={'100%'}>
-            <NavLink
-                onClick={() => navigate('/')}
-                label={'Home'}
-                active={currentUrl === '/'}
-                leftSection={<IconHome size={20} stroke={1.5} />}
-            />
             <NavLink
                 onClick={() => navigate('/dps')}
                 label={'DPS'}

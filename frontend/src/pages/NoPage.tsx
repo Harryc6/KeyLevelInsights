@@ -1,10 +1,11 @@
 import { FC } from 'react'
+import { Stack, Text, Title } from '@mantine/core'
 
 export const NoPage: FC = () => {
     return (
-        <div>
-            <h1>404</h1>
-            <p>Page not found!</p>
-        </div>
+        <Stack>
+            <Title order={1}>404</Title>
+            <Text>Page not found!</Text>
+        </Stack>
     )
 }
