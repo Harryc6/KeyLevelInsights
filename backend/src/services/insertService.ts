@@ -4,13 +4,12 @@ import { Run } from '../types/kli/run'
 
 export const insertRuns = async (runs: Run[]): Promise<void> => {
     const BATCH_SIZE = 1000
-    console.log(`Attempting to insert ${runs.length} runs...`)
     let totalInserted = 0
     for (let i = 0; i < runs.length; i += BATCH_SIZE) {
         const batch = runs.slice(i, i + BATCH_SIZE)
         totalInserted += await insertRunsBatch(batch)
     }
-    console.log(`Inserted ${totalInserted} new runs`)
+    console.log(`Inserted ${totalInserted} / ${runs.length} new runs`)
 }
 
 async function insertRunsBatch(batch: Run[]) {
@@ -43,13 +42,13 @@ async function insertRunsBatch(batch: Run[]) {
 
 export const insertCharacters = async (character: Character[]): Promise<void> => {
     const BATCH_SIZE = 1000
-    console.log(`Attempting to insert ${character.length} characters...`)
     let totalInserted = 0
     for (let i = 0; i < character.length; i += BATCH_SIZE) {
         const batch = character.slice(i, i + BATCH_SIZE)
         totalInserted += await insertCharacterBatch(batch)
     }
-    console.log(`Inserted ${totalInserted} new characters`)
+    console.log(`Inserted ${totalInserted} / ${character.length} new characters`)
+    return Promise.resolve()
 }
 
 async function insertCharacterBatch(batch: Character[]) {

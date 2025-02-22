@@ -2,9 +2,8 @@ import { getConnectedRealmIDs } from './connectedRealmService'
 import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
 import { insertCharacters, insertRuns } from './insertService'
-import Bottleneck from 'bottleneck'
 import { dpsIDs, dungeonIDs, dungeonMap, healerIDs, tankIDs } from '../types/kli/map'
-import { LeadingGroup, Member, MythicLeaderboardDetails } from '../types/bnet/mythicLeaderboard'
+import { LeadingGroup, Member } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
 
 export const updateAllExpansionsRuns = async () => {
@@ -16,84 +15,91 @@ export const updateAllExpansionsRuns = async () => {
     }
 }
 
-const limiter = new Bottleneck({ maxConcurrent: 20, minTime: 50 })
-const getMythicLeaderboardByDungeonAndPeriodLimited = limiter.wrap(getMythicLeaderboardByDungeonAndPeriod)
-
 export const collectAndStoreRuns = async (period?: number) => {
     const [connectedRealmIDs, currentPeriod] = await Promise.all([getConnectedRealmIDs(), getCurrentPeriod()])
-    await Promise.all(
-        dungeonIDs.map((dungeonID) =>
-            collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, period ?? currentPeriod)
-        )
-    )
+    console.time(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
+    for (const dungeonID of dungeonIDs) {
+        await collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, period ?? currentPeriod)
+    }
+    console.timeEnd(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
+    console.log('****************************************************************')
+    return Promise.resolve()
 }
 
 async function collectAndStoreRunsByDungeon(dungeon: number, connectedRealmIDs: number[], period: number) {
-    console.log(`Collecting leaderboards for ${dungeonMap.get(dungeon)} (${dungeon})...`)
-    const leaderboards: MythicLeaderboardDetails[] = await fetchLeaderboards(connectedRealmIDs, dungeon, period)
-
+    console.log(`Collecting leaderboards for ${dungeonMap.get(dungeon)} for period ${period}`)
+    console.time(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
+    const leaderboards: LeadingGroup[] = await fetchLeaderboards(connectedRealmIDs, dungeon, period)
     const uniqueRuns = getUniqueRuns(leaderboards)
     const uniqueCharacters = getUniqueCharacters(uniqueRuns)
-
-    logCollectionResults(dungeon, period, connectedRealmIDs, leaderboards, uniqueRuns, uniqueCharacters)
-
-    await prepareRunsInsert(uniqueRuns, dungeon, period)
-    await prepCharacterInsert(uniqueCharacters)
+    await saveLeaderboardData(uniqueRuns, dungeon, period, uniqueCharacters)
+    console.timeEnd(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
+    console.log('****************************************************************')
+    return Promise.resolve()
 }
 
 const fetchLeaderboards = async (connectedRealmIDs: number[], dungeonID: number, currentPeriod: number) => {
-    return await Promise.all(
-        connectedRealmIDs.map((id) => getMythicLeaderboardByDungeonAndPeriodLimited(id, dungeonID, currentPeriod))
+    console.time(`Fetched leaderboards in`)
+    let completed = 0
+    process.stdout.write(
+        `Fetching leaderboards for ${dungeonMap.get(dungeonID)}: ${completed}/${connectedRealmIDs.length}`
     )
+    const results = await Promise.all(
+        connectedRealmIDs.map(async (id) => {
+            const results = await getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod)
+            if (completed + 1 === connectedRealmIDs.length) process.stdout.write('\r\x1b[K')
+            else
+                process.stdout.write(
+                    `\rFetching leaderboards for ${dungeonMap.get(dungeonID)}: ${++completed} / ${connectedRealmIDs.length}`
+                )
+            return results
+        })
+    ).then((results) => results.flatMap((board) => board.leading_groups))
+    console.log(`Fetched leaderboards containing ${results.length} runs`)
+    console.timeEnd(`Fetched leaderboards in`)
+    return results
 }
 
-const getUniqueRuns = (leaderboards: MythicLeaderboardDetails[]) => {
-    return leaderboards
-        .flatMap((board) => board.leading_groups)
-        .filter(Boolean)
-        .sort((a, b) => b.keystone_level - a.keystone_level || b.mythic_rating.rating - a.mythic_rating.rating)
-        .filter(
-            (run, index, self) =>
-                // find the first run with the same rating, duration, keystone level, completed timestamp and members
-                self.findIndex(
-                    (r) =>
-                        r.mythic_rating.rating === run.mythic_rating.rating &&
-                        r.duration === run.duration &&
-                        r.keystone_level === run.keystone_level &&
-                        r.completed_timestamp === run.completed_timestamp &&
-                        r.members.every((m, i) => m.profile.name === run.members[i].profile.name)
-                ) === index
-        )
-        .filter((run) =>
-            // filter out runs with missing specialization ids
-            run.members.every(
-                (member) => !(member.specialization === undefined || member.specialization.id === undefined)
-            )
-        )
+const getUniqueRuns = (runs: LeadingGroup[]) => {
+    const uniqueRuns = new Map<string, LeadingGroup>()
+    console.time('Filtered Unique runs')
+    runs.forEach((run) => {
+        if (!run) return
+
+        const key = `${run.mythic_rating.rating}-${run.duration}-${run.keystone_level}-${run.completed_timestamp}-${run.members.map((m) => m.profile.name).join(',')}`
+        if (!uniqueRuns.has(key) && run.members.every((member) => member.specialization?.id !== undefined)) {
+            uniqueRuns.set(key, run)
+        }
+    })
+    console.timeEnd('Filtered Unique runs')
+    return Array.from(uniqueRuns.values())
 }
 
 const getUniqueCharacters = (uniqueRuns: LeadingGroup[]) => {
-    return uniqueRuns
-        .flatMap((run) => run.members)
-
-        .filter((character, index, self) => self.findIndex((c) => c.profile.id === character.profile.id) === index)
+    const uniqueCharactersMap = new Map<number, Member>()
+    console.time('Filtered Unique characters')
+    uniqueRuns.forEach((run) => {
+        run.members.forEach((member) => {
+            if (!uniqueCharactersMap.has(member.profile.id)) {
+                uniqueCharactersMap.set(member.profile.id, member)
+            }
+        })
+    })
+    console.timeEnd('Filtered Unique characters')
+    return Array.from(uniqueCharactersMap.values())
 }
 
-const logCollectionResults = (
-    dungeonID: number,
-    currentPeriod: number,
-    connectedRealmIDs: number[],
-    leaderboards: MythicLeaderboardDetails[],
+async function saveLeaderboardData(
     uniqueRuns: LeadingGroup[],
+    dungeon: number,
+    period: number,
     uniqueCharacters: Member[]
-) => {
-    console.info(`****************************************************************`)
-    console.info(`Leaderboards for ${dungeonMap.get(dungeonID)} (${dungeonID}) for period ${currentPeriod} collected`)
-    console.info(`Total connected realms: ${connectedRealmIDs.length}`)
-    console.info(`Total runs: ${leaderboards.flatMap((board) => board.leading_groups).length}`)
-    console.info(`Unique runs: ${uniqueRuns.length}`)
-    console.info(`Unique characters: ${uniqueCharacters.length}`)
-    console.info(`****************************************************************`)
+) {
+    console.time(`Inserting data`)
+    await prepareRunsInsert(uniqueRuns, dungeon, period)
+    await prepCharacterInsert(uniqueCharacters)
+    console.timeEnd(`Inserting data`)
+    return Promise.resolve()
 }
 
 async function prepCharacterInsert(uniqueCharacters: Member[]) {
