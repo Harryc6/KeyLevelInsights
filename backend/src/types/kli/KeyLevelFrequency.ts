@@ -23,8 +23,8 @@ export type FrequencyReport = {
 }
 
 export type SpecFrequency = {
-    spec: SpecId
     keystone_level: number
+    spec_id: SpecId
     runs: number
 }
 

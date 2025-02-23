@@ -11,12 +11,34 @@ import { dungeonIDs } from '../types/kli/map'
 
 export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequency[]> => {
     const query = `
-        SELECT b.spec, a.keystone_level, count(a.keystone_level) as runs
+        WITH expanded_runs AS (
+            SELECT
+                a.keystone_level,
+                cast(jsonb_array_elements(a.tank)->>'spec_id' as integer) AS spec_id
         FROM runs a
-        LEFT JOIN characters b ON b.character_id = ANY(a.tank) OR b.character_id = ANY(a.healer) OR b.character_id = ANY(a.dps)
         ${period ? 'WHERE period = $1' : ''}
-        GROUP BY b.spec, keystone_level
-        ORDER BY b.spec, keystone_level
+
+        UNION ALL
+        SELECT
+            a.keystone_level,
+            cast(jsonb_array_elements(a.healer)->>'spec_id' as integer) AS spec_id
+        FROM runs a
+        ${period ? 'WHERE period = $1' : ''}
+
+        UNION ALL
+        SELECT
+            a.keystone_level,
+            cast(jsonb_array_elements(a.dps)->>'spec_id' as integer) spec_id
+        FROM runs a
+        ${period ? 'WHERE period = $1' : ''}
+            )
+        SELECT
+            keystone_level,
+            spec_id,
+            COUNT(*) AS runs
+        FROM expanded_runs
+        GROUP BY keystone_level, spec_id
+        ORDER BY keystone_level, spec_id
     `
     try {
         const result = await pool.query<SpecFrequency>(query, period ? [period] : [])

@@ -26,9 +26,9 @@ async function insertRunsBatch(batch: Run[]) {
         run.duration,
         run.completed_timestamp,
         run.period,
-        run.tank,
-        run.healer,
-        run.dps,
+        JSON.stringify(run.tank),
+        JSON.stringify(run.healer),
+        JSON.stringify(run.dps),
     ])
 
     try {

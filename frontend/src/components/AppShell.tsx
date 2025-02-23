@@ -4,6 +4,7 @@ import { FC } from 'react'
 import { ColorSchemeChanger } from './ColorSchemeChanger.tsx'
 import { Outlet, useNavigate } from 'react-router'
 import { Navbar } from './Navbar.tsx'
+import { ErrorBoundary } from 'react-error-boundary'
 
 const AppShell: FC = () => {
     const [opened, { toggle }] = useDisclosure()
@@ -36,7 +37,9 @@ const AppShell: FC = () => {
                 </Stack>
             </MantineAppShell.Navbar>
 
-            <MantineAppShell.Main>{<Outlet />}</MantineAppShell.Main>
+            <MantineAppShell.Main>
+                <ErrorBoundary fallback={<Title>Something went wrong</Title>}>{<Outlet />}</ErrorBoundary>
+            </MantineAppShell.Main>
         </MantineAppShell>
     )
 }

@@ -121,18 +121,17 @@ async function prepareRunsInsert(uniqueRuns: LeadingGroup[], dungeonID: number, 
             duration: run.duration,
             completed_timestamp: run.completed_timestamp,
             period: currentPeriod,
-            // find any tank specializations in the run and place their profile id in the tank field
             tank: run.members
                 .filter((member) => tankIDs.includes(member.specialization.id))
-                .map((member) => member.profile.id),
+                .map((member) => ({ character_id: member.profile.id, spec_id: member.specialization.id })),
             // find any healer specializations in the run and place their profile id in the healer field
             healer: run.members
                 .filter((member) => healerIDs.includes(member.specialization.id))
-                .map((member) => member.profile.id),
+                .map((member) => ({ character_id: member.profile.id, spec_id: member.specialization.id })),
             // find any dps specializations in the run and place their profile id in the dps field
             dps: run.members
                 .filter((member) => dpsIDs.includes(member.specialization.id))
-                .map((member) => member.profile.id),
+                .map((member) => ({ character_id: member.profile.id, spec_id: member.specialization.id })),
         }
     })
 

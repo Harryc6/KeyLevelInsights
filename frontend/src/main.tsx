@@ -6,6 +6,7 @@ import { createTheme, MantineProvider } from '@mantine/core'
 import { QueryClient } from '@tanstack/react-query'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { ErrorBoundary } from 'react-error-boundary'
 
 // Import Mantine styles
 import '@mantine/core/styles.css'
@@ -38,7 +39,9 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
             <MantineProvider defaultColorScheme={'auto'} theme={theme}>
-                <App />
+                <ErrorBoundary fallback={<p>Something went wrong</p>}>
+                    <App />
+                </ErrorBoundary>
             </MantineProvider>
         </PersistQueryClientProvider>
     </StrictMode>

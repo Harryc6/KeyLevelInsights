@@ -21,7 +21,7 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
 export const fetchSpecFrequency = async (req: Request, res: Response): Promise<void> => {
     console.time('Fetching spec frequency')
     const period = parseInt(req.params.period)
-    return getSpecFrequencyReport(period)
+    return getSpecFrequencyReport(Number.isNaN(period) ? undefined : period)
         .then((specFrequencies) => {
             res.json(convertToSpecFrequenciesToReports(specFrequencies))
         })
@@ -37,10 +37,10 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
 const convertToSpecFrequenciesToReports = (specFrequencies: SpecFrequency[]): SpecFrequencyReport[] => {
     const specFrequencyReport: SpecFrequencyReport[] = []
     specFrequencies.forEach((specFrequency) => {
-        const specName = convertSpecIdToName(specFrequency.spec)
+        const specName = convertSpecIdToName(specFrequency.spec_id)
 
         if (!specName) {
-            console.error(`Spec ID ${specFrequency.spec} does not have a corresponding name.`)
+            console.error(`Spec ID ${specFrequency.spec_id} does not have a corresponding name.`)
             return
         }
 
