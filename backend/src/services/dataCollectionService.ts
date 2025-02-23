@@ -41,17 +41,12 @@ async function collectAndStoreRunsByDungeon(dungeon: number, connectedRealmIDs: 
 const fetchLeaderboards = async (connectedRealmIDs: number[], dungeonID: number, currentPeriod: number) => {
     console.time(`Fetched leaderboards in`)
     let completed = 0
-    process.stdout.write(
-        `Fetching leaderboards for ${dungeonMap.get(dungeonID)}: ${completed}/${connectedRealmIDs.length}`
-    )
+    process.stdout.write(`Fetching leaderboards: ${completed} / ${connectedRealmIDs.length}`)
     const results = await Promise.all(
         connectedRealmIDs.map(async (id) => {
             const results = await getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod)
             if (completed + 1 === connectedRealmIDs.length) process.stdout.write('\r\x1b[K')
-            else
-                process.stdout.write(
-                    `\rFetching leaderboards for ${dungeonMap.get(dungeonID)}: ${++completed} / ${connectedRealmIDs.length}`
-                )
+            else process.stdout.write(`\rFetching leaderboards: ${++completed} / ${connectedRealmIDs.length}`)
             return results
         })
     ).then((results) => results.flatMap((board) => board.leading_groups))

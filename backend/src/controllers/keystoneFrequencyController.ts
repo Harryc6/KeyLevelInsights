@@ -4,6 +4,7 @@ import { SpecFrequency, SpecFrequencyReport } from '../types/kli/KeyLevelFrequen
 import { SpecId, specIds, SpecName, specNames } from '../types/kli/map'
 
 export const fetchKeystoneFrequency = async (req: Request, res: Response): Promise<void> => {
+    console.time('Fetching keystone frequency')
     return getKeystoneFrequencyReport()
         .then((connectedRealms) => {
             res.json(connectedRealms)
@@ -12,9 +13,13 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
             res.status(500).json({ error: 'Failed to fetch keystone frequency report' })
             Promise.reject(error)
         })
+        .finally(() => {
+            console.timeEnd('Fetching keystone frequency')
+        })
 }
 
 export const fetchSpecFrequency = async (req: Request, res: Response): Promise<void> => {
+    console.time('Fetching spec frequency')
     const period = parseInt(req.params.period)
     return getSpecFrequencyReport(period)
         .then((specFrequencies) => {
@@ -23,6 +28,9 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
         .catch((error) => {
             res.status(500).json({ error: 'Failed to fetch spec frequency report' })
             Promise.reject(error)
+        })
+        .finally(() => {
+            console.timeEnd('Fetching spec frequency')
         })
 }
 
