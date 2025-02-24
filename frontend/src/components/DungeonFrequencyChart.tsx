@@ -24,8 +24,8 @@ const DungeonFrequencyChart: FC = () => {
             w={800}
             data={chartData}
             getBarColor={(bar) => {
-                const dungeon = data.find((value) => value.runs === bar)?.dungeon
-                return dungeonSeries.find((value) => value.name === String(dungeon))?.color ?? 'violet'
+                const dungeon = chartData.find((value) => value.runs === bar)?.dungeon
+                return dungeonSeries.find((value) => value.label === String(dungeon))?.color ?? 'violet'
             }}
             dataKey={'dungeon'}
             series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
