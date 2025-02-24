@@ -6,21 +6,21 @@ export type KeystoneLevelFrequency = {
 }
 
 export type DungeonFrequency = {
-    byKeystoneLevel: KeystoneLevelFrequency[]
     dungeon: number
+    runs: number
 }
 
-export type PeriodFrequencyReport = {
-    byKeystoneLevel: KeystoneLevelFrequency[]
-    byDungeon: DungeonFrequency[]
-    totalRuns: number
-}
+// export type PeriodFrequencyReport = {
+//     byKeystoneLevel: KeystoneLevelFrequency[]
+//     byDungeon: DungeonFrequency[]
+//     totalRuns: number
+// }
 
-export type FrequencyReport = {
-    currentPeriod: PeriodFrequencyReport
-    lastPeriod: PeriodFrequencyReport
-    allPeriods: PeriodFrequencyReport
-}
+// export type FrequencyReport = {
+//     currentPeriod: PeriodFrequencyReport
+//     lastPeriod: PeriodFrequencyReport
+//     allPeriods: PeriodFrequencyReport
+// }
 
 export type SpecFrequency = {
     keystone_level: number

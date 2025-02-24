@@ -1,5 +1,5 @@
 import pool from '../utils/db'
-import { KeystoneLevelFrequency, SpecFrequency } from '../types/kli/KeyLevelFrequency'
+import { DungeonFrequency, KeystoneLevelFrequency, SpecFrequency } from '../types/kli/KeyLevelFrequency'
 
 export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequency[]> => {
     const query = `
@@ -59,6 +59,20 @@ export const getKeystoneFrequencyReport = async (
 
     try {
         return await pool.query<KeystoneLevelFrequency>(query, params).then((res) => res.rows)
+    } catch (error) {
+        console.error('Error counting runs:', error)
+        throw error
+    }
+}
+
+export const getDungeonFrequencyReport = async (period?: number): Promise<DungeonFrequency[]> => {
+    const query = `
+        select dungeon, cast(count(dungeon) as integer) as runs from runs
+        ${period ? 'WHERE period = $1' : ''}
+        group by dungeon order by dungeon
+    `
+    try {
+        return await pool.query<DungeonFrequency>(query, period ? [period] : []).then((res) => res.rows)
     } catch (error) {
         console.error('Error counting runs:', error)
         throw error

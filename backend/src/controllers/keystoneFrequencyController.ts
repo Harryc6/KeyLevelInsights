@@ -1,5 +1,9 @@
 import { Request, Response } from 'express'
-import { getKeystoneFrequencyReport, getSpecFrequencyReport } from '../services/countKeystoneService'
+import {
+    getDungeonFrequencyReport,
+    getKeystoneFrequencyReport,
+    getSpecFrequencyReport,
+} from '../services/countKeystoneService'
 import { SpecFrequency, SpecFrequencyReport } from '../types/kli/KeyLevelFrequency'
 import { SpecId, specIds, SpecName, specNames } from '../types/kli/map'
 import NodeCache from 'node-cache'
@@ -7,8 +11,8 @@ import NodeCache from 'node-cache'
 const cache = new NodeCache({ stdTTL: 3600 }) // Cache TTL of 1 hour
 
 export const fetchKeystoneFrequency = async (req: Request, res: Response): Promise<void> => {
-    const period = parseInt(req.params.period)
-    const dungeon = parseInt(req.params.dungeon)
+    const period = parseInt(req.query.period as string)
+    const dungeon = parseInt(req.query.dungeon as string)
     console.time(
         `Fetching keystone frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
     )
@@ -45,7 +49,7 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
 
 export const fetchSpecFrequency = async (req: Request, res: Response): Promise<void> => {
     console.time('Fetching spec frequency')
-    const period = parseInt(req.params.period)
+    const period = parseInt(req.query.period as string)
     const cacheKey = `specFrequency_${isNaN(period) ? 'all' : period}`
 
     // Check if the data is in the cache
@@ -101,4 +105,31 @@ const convertToSpecFrequenciesToReports = (specFrequencies: SpecFrequency[]): Sp
 
 const convertSpecIdToName = (specId: SpecId): SpecName => {
     return specNames[specIds.indexOf(specId)]
+}
+
+export const fetchDungeonFrequency = async (req: Request, res: Response): Promise<void> => {
+    console.time('Fetching dungeon frequency')
+    const period = parseInt(req.query.period as string)
+    const cacheKey = `dungeonFrequency_${isNaN(period) ? 'all' : period}`
+
+    // Check if the data is in the cache
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+        console.log('Returning cached data')
+        res.json(cachedData)
+        console.timeEnd('Fetching dungeon frequency')
+        return
+    }
+
+    return getDungeonFrequencyReport(Number.isNaN(period) ? undefined : period)
+        .then((dungeonFrequency) => {
+            cache.set(cacheKey, dungeonFrequency) // Store the result in the cache
+            res.json(dungeonFrequency)
+        })
+        .catch(() => {
+            res.status(500).json({ error: 'Failed to fetch dungeon frequency report' })
+        })
+        .finally(() => {
+            console.timeEnd('Fetching dungeon frequency')
+        })
 }

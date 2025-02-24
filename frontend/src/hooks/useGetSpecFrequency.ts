@@ -44,9 +44,10 @@ export type SpecFrequencyReport = {
     augmentation: number
 }
 
-export const useGetSpecFrequency = (): UseSuspenseQueryResult<SpecFrequencyReport[]> => {
+export const useGetSpecFrequency = (period?: number): UseSuspenseQueryResult<SpecFrequencyReport[]> => {
+    const path = `/spec-frequency${period ? `?period=${period}` : ''}`
     return useSuspenseQuery<SpecFrequencyReport[]>({
         queryKey: ['SpecFrequency'],
-        queryFn: () => useFetchData<SpecFrequencyReport[]>('spec-frequency'),
+        queryFn: () => useFetchData<SpecFrequencyReport[]>(path),
     })
 }

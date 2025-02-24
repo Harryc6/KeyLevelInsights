@@ -6,26 +6,13 @@ export type KeystoneLevelFrequency = {
     runs: number
 }
 
-export type DungeonFrequency = {
-    byKeystoneLevel: KeystoneLevelFrequency[]
-    dungeon: number
-}
-
-export type PeriodFrequencyReport = {
-    byKeystoneLevel: KeystoneLevelFrequency[]
-    byDungeon: DungeonFrequency[]
-    totalRuns: number
-}
-
-export type FrequencyReport = {
-    currentPeriod: PeriodFrequencyReport
-    lastPeriod: PeriodFrequencyReport
-    allPeriods: PeriodFrequencyReport
-}
-
-export const useGetKeystoneFrequency = (): UseSuspenseQueryResult<FrequencyReport> => {
-    return useSuspenseQuery<FrequencyReport>({
+export const useGetKeystoneFrequency = (
+    period?: number,
+    dungeon?: number
+): UseSuspenseQueryResult<KeystoneLevelFrequency[]> => {
+    const path = `/keystone-frequency${period || dungeon ? '?' : ''}${period ? `period=${period}` : ''}${period && dungeon ? '&' : ''}${dungeon ? `&dungeon=${dungeon}` : ''}`
+    return useSuspenseQuery<KeystoneLevelFrequency[]>({
         queryKey: ['KeystoneFrequency'],
-        queryFn: () => useFetchData<FrequencyReport>('keystone-frequency'),
+        queryFn: () => useFetchData<KeystoneLevelFrequency[]>(path),
     })
 }
