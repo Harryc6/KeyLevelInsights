@@ -46,7 +46,7 @@ export const getKeystoneFrequencyReport = async (
     dungeon?: number
 ): Promise<KeystoneLevelFrequency[]> => {
     const query = `
-        select keystone_level as keystoneLevel, count(keystone_level) as runs
+        select keystone_level, count(keystone_level) as runs
         from runs
         ${period ? 'WHERE period = $1' : ''}
         ${period && dungeon ? 'AND dungeon = $2' : ''}
@@ -58,7 +58,14 @@ export const getKeystoneFrequencyReport = async (
     if (dungeon) params.push(dungeon)
 
     try {
-        return await pool.query<KeystoneLevelFrequency>(query, params).then((res) => res.rows)
+        return await pool.query(query, params).then((res) => {
+            return res.rows.map((row) => {
+                return {
+                    keystoneLevel: row.keystone_level,
+                    runs: row.runs,
+                }
+            })
+        })
     } catch (error) {
         console.error('Error counting runs:', error)
         throw error
