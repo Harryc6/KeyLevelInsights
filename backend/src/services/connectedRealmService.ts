@@ -8,8 +8,8 @@ export const getConnectRealmsIndex = async (): Promise<ConnectedRealmsList> => {
             return data
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.error('Error fetching connected realms index:', error)
+            throw error
         })
 }
 
@@ -19,8 +19,8 @@ export const getConnectedRealmByID = async (connectedRealmId: number): Promise<C
             return data
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.error(`Error fetching connected realm ${connectedRealmId}:`, error)
+            throw error
         })
 }
 
@@ -36,8 +36,8 @@ export const getConnectedRealmNames = async (): Promise<string[]> => {
                 .flatMap((realmNames) => realmNames)
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.error('Error fetching connected realm names:', error)
+            throw error
         })
 }
 
@@ -46,10 +46,10 @@ export const getConnectedRealmIDs = async (): Promise<number[]> => {
         bNetPathBuilder(`/search/connected-realm`, new URLSearchParams({ orderby: 'id' }))
     )
         .then((paginatedConnectedRealms) => {
-            return paginatedConnectedRealms.results.map((connectedRealm) => connectedRealm.data.id)
+            return paginatedConnectedRealms?.results.map((connectedRealm) => connectedRealm.data.id)
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.error('Error fetching connected realm IDs:', error)
+            throw error
         })
 }

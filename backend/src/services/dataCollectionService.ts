@@ -49,7 +49,12 @@ const fetchLeaderboards = async (connectedRealmIDs: number[], dungeonID: number,
             else process.stdout.write(`\rFetching leaderboards: ${++completed} / ${connectedRealmIDs.length}`)
             return results
         })
-    ).then((results) => results.flatMap((board) => board.leading_groups))
+    )
+        .then((results) => results.flatMap((board) => board.leading_groups))
+        .catch((error) => {
+            console.error('Error fetching leaderboards:', error)
+            throw error
+        })
     console.log(`Fetched leaderboards containing ${results.length} runs`)
     console.timeEnd(`Fetched leaderboards in`)
     return results

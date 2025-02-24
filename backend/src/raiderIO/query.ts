@@ -20,9 +20,10 @@ export const executeRaiderIOQuery = async <T>(
         .catch((error: unknown) => {
             if (isAxiosError(error)) {
                 console.error('Raider.IO request failed:', error.message)
+                throw new Error(`Raider.IO request failed with status code ${error.response?.status}`)
             } else {
                 console.error('Raider.IO request failed:', error)
+                throw new Error('Raider.IO request failed:' + error)
             }
-            return Promise.reject(error)
         })
 }

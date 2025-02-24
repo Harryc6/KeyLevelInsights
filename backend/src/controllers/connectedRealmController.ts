@@ -6,15 +6,14 @@ import {
     getConnectRealmsIndex,
 } from '../services/connectedRealmService'
 
-export const fetchConnectedRealms = async (req: Request, res: Response): Promise<void> => {
+export const fetchConnectedRealms = async (_: Request, res: Response): Promise<void> => {
     console.time('Fetching connected realms')
     return getConnectRealmsIndex()
         .then((connectedRealms) => {
             res.json(connectedRealms)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch connected realms' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd('Fetching connected realms')
@@ -28,9 +27,8 @@ export const fetchSpecificConnectedRealm = async (req: Request, res: Response): 
         .then((connectedRealm) => {
             res.json(connectedRealm)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch connected realm' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd(`Fetching connected realm ${connectedRealmId}`)
@@ -43,9 +41,8 @@ export const fetchConnectedRealmNames = async (req: Request, res: Response): Pro
         .then((realmNames) => {
             res.json(realmNames)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch connected realm names' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd('Fetching connected realm names')
@@ -58,9 +55,8 @@ export const fetchConnectedRealmIDs = async (req: Request, res: Response): Promi
         .then((realmIDs) => {
             res.json(realmIDs)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch connected realm IDs' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd('Fetching connected realm IDs')

@@ -10,7 +10,7 @@ export const getMythicKeystoneDungeonsIndex = async (): Promise<MythicKeystoneDu
         })
         .catch((error) => {
             console.error('Error fetching mythic keystone dungeons:', error)
-            return Promise.reject(error)
+            throw error
         })
 }
 
@@ -21,7 +21,7 @@ export const getMythicKeystonePeriodIndex = async (): Promise<MythicKeystonePeri
         })
         .catch((error) => {
             console.error('Error fetching mythic keystone periods:', error)
-            return Promise.reject(error)
+            throw error
         })
 }
 
@@ -32,7 +32,7 @@ export const getMythicKeystoneSeasonIndex = async (): Promise<MythicKeystoneSeas
         })
         .catch((error) => {
             console.error('Error fetching mythic keystone seasons:', error)
-            return Promise.reject(error)
+            throw error
         })
 }
 
@@ -43,6 +43,6 @@ export const getCurrentPeriod = async (): Promise<number> => {
         })
         .catch((error) => {
             console.error('Error fetching current period:', error)
-            return Promise.reject(error)
+            throw error
         })
 }

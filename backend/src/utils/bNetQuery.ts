@@ -13,27 +13,46 @@ const limiter = new Bottleneck({
     // reservoir: 36000, // Initial number of requests allowed
     // reservoirRefreshAmount: 36000, // Number of requests to add to the reservoir every interval
     // reservoirRefreshInterval: 1000 * 60 * 60, // Interval in milliseconds to add requests to the reservoir
-    minTime: 100, // Minimum time in milliseconds between each request
+    minTime: 10, // Minimum time in milliseconds between each request
 })
 
 export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
     const token = await getValidBNetAccessToken()
-    // uncomment the following line to see the BNet query being executed
-    // console.debug(`Executing BNet query: ${path}`)
-    return limiter.schedule<T>(async () => {
+    const retries: number = 3
+    let delay: number = 1000
+
+    for (let attempt = 0; attempt < retries; attempt++) {
         try {
-            const response = await axios.get<T>(path, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+            return await limiter.schedule<T>(async () => {
+                const response = await axios.get<T>(path, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                return response.data
             })
-            return response.data
         } catch (error) {
-            console.error('API request failed:', isAxiosError(error) ? error.message : error)
-            return await Promise.reject(error)
+            if (isAxiosError(error) && error.response?.status === 504 && attempt < retries - 1) {
+                console.warn(`Attempt ${attempt + 1} failed with 504, retrying in ${delay}ms...`)
+                await new Promise((resolve) => setTimeout(resolve, delay))
+                delay *= 2 // Exponential backoff
+                continue
+            } else if (isAxiosError(error) && error.response?.status === 429) {
+                console.warn('Rate limited by the Blizzard API, retrying in 5 seconds...')
+                await new Promise((resolve) => setTimeout(resolve, 5000))
+                delay *= 2 // Exponential backoff
+                continue
+            } else if (isAxiosError(error)) {
+                console.error('Blizzard API request failed:', error.message)
+                throw new Error(`Blizzard API request failed with status code ${error.response?.status}`)
+            }
+            console.error('Blizzard API request failed:', isAxiosError(error) ? error.message : error)
+            throw new Error('Blizzard API request failed:' + (isAxiosError(error) ? error.message : error))
         }
-    })
+    }
+    console.error(`Failed to fetch data from ${path} after ${retries} attempts`)
+    throw `Failed to fetch data from ${path} after ${retries} attempts`
 }
 
 export function bNetPathBuilder(

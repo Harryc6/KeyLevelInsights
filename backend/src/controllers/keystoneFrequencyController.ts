@@ -33,9 +33,8 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
             cache.set(cacheKey, keystoneFrequency) // Store the result in the cache
             res.json(keystoneFrequency)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch keystone frequency report' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd(
@@ -65,9 +64,8 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
             cache.set(cacheKey, report) // Store the result in the cache
             res.json(report)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch spec frequency report' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd('Fetching spec frequency')

@@ -27,7 +27,12 @@ export const executeWCLQuery = async <T>(query: string): Promise<T> => {
             return response.data.data
         })
         .catch((error: unknown) => {
-            console.error('GraphQL request failed:', isAxiosError(error) ? error.message : error)
-            return Promise.reject(error)
+            if (isAxiosError(error)) {
+                console.error('GraphQL request failed:', error.message)
+                throw new Error(`GraphQL request failed with status code ${error.response?.status}`)
+            } else {
+                console.error('GraphQL request failed:', error)
+                throw new Error('GraphQL request failed:' + error)
+            }
         })
 }

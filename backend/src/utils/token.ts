@@ -47,7 +47,7 @@ const getValidAccessToken = async (
         })
         .catch((error) => {
             console.error('Error getting access token:', error.response?.data || error.message)
-            return Promise.reject(error)
+            throw new Error('Error getting access token')
         })
 }
 
@@ -137,7 +137,8 @@ export const getValidBNetAccessToken = async (): Promise<string> => {
                         return newToken
                     })
                     .catch((error) => {
-                        return Promise.reject(error)
+                        console.error('Error getting Battle.net access token:', error)
+                        throw new Error('Error getting Battle.net access token')
                     })
                     .finally(() => {
                         isFetchingToken = false

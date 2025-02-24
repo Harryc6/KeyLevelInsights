@@ -10,9 +10,8 @@ export const fetchMythicLeaderboard = async (req: Request, res: Response): Promi
         .then((connectedRealms) => {
             res.json(connectedRealms)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch mythic keystone dungeons' })
-            Promise.reject(error)
         })
         .then(() => {
             console.timeEnd(`Fetching leaderboard index for connected realm ${connectedRealmId}`)
@@ -30,9 +29,8 @@ export const fetchMythicLeaderboardByDungeonAndPeriod = async (req: Request, res
         .then((connectedRealms) => {
             res.json(connectedRealms)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch mythic keystone dungeons' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd(
@@ -52,9 +50,8 @@ export const fetchCurrentMythicLeaderboardDungeonByDungeon = async (req: Request
         .then((connectedRealms) => {
             res.json(connectedRealms)
         })
-        .catch((error) => {
+        .catch(() => {
             res.status(500).json({ error: 'Failed to fetch mythic keystone dungeons' })
-            Promise.reject(error)
         })
         .finally(() => {
             console.timeEnd(

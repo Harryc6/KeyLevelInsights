@@ -13,7 +13,6 @@ const useFetchData = async <T>(path: string): Promise<T> => {
             } else {
                 console.error(error)
             }
-            // return Promise.reject(error)
             throw new Error('Failed to fetch data')
         })
 }

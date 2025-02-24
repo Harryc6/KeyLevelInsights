@@ -37,7 +37,7 @@ app.get('/', (req: Request, res: Response) => {
 // Schedule a job to run collectAndStoreRuns() every hour
 cron.schedule('0 * * * *', () => {
     console.log('Running collectAndStoreRuns() job...')
-    collectAndStoreRuns()
+    collectAndStoreRuns().catch((err) => console.error(err))
 })
 
 // updateAllExpansionsRuns()

@@ -19,6 +19,6 @@ export const getRateLimitData = async (): Promise<RateLimitData> => {
         })
         .catch((error) => {
             console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            throw error
         })
 }

@@ -9,8 +9,8 @@ export const getMythicLeaderboardIndex = async (connectedRealmId: number): Promi
             return data
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.log(`Error fetching mythic leaderboard index for connected realm ${connectedRealmId}:`, error)
+            throw error
         })
 }
 
@@ -26,7 +26,10 @@ export const getMythicLeaderboardByDungeonAndPeriod = async (
             return data
         })
         .catch((error) => {
-            console.error('Error fetching rate limit data:', error)
-            return Promise.reject(error)
+            console.error(
+                `Error fetching mythic leaderboard for connected realm ${connectedRealmId}, dungeon ${dungeonId} and period ${period}:`,
+                error
+            )
+            throw error
         })
 }
