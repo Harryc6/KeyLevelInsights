@@ -1,6 +1,6 @@
 import { AppShell as MantineAppShell, Burger, Group, Stack, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { FC } from 'react'
+import { FC, Suspense } from 'react'
 import { ColorSchemeChanger } from './ColorSchemeChanger.tsx'
 import { Outlet, useNavigate } from 'react-router'
 import { Navbar } from './Navbar.tsx'
@@ -38,7 +38,9 @@ const AppShell: FC = () => {
             </MantineAppShell.Navbar>
 
             <MantineAppShell.Main>
-                <ErrorBoundary fallback={<Title>Something went wrong</Title>}>{<Outlet />}</ErrorBoundary>
+                <ErrorBoundary fallback={<Title>Something went wrong</Title>}>
+                    <Suspense fallback={<Title>Loading...</Title>}>{<Outlet />}</Suspense>
+                </ErrorBoundary>
             </MantineAppShell.Main>
         </MantineAppShell>
     )

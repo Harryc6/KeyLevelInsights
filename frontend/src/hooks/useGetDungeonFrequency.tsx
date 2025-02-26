@@ -9,7 +9,7 @@ export type DungeonFrequency = {
 export const useGetDungeonFrequency = (period?: number): UseSuspenseQueryResult<DungeonFrequency[]> => {
     const path = `/dungeon-frequency${period ? `?period=${period}` : ''}`
     return useSuspenseQuery<DungeonFrequency[]>({
-        queryKey: ['KeystoneFrequency'],
+        queryKey: ['DungeonFrequency', period],
         queryFn: () => useFetchData<DungeonFrequency[]>(path),
     })
 }

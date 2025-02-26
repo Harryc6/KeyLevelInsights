@@ -1,17 +1,24 @@
-import { FC, lazy, Suspense } from 'react'
-import { Skeleton, Stack, Title } from '@mantine/core'
+import { FC, lazy, Suspense, useState } from 'react'
+import { Group, Skeleton, Stack, Title } from '@mantine/core'
+import PeriodSelect from '../components/PeriodSelect.tsx'
 
 const DungeonFrequencyChart = lazy(() => import('../components/DungeonFrequencyChart'))
 
 export const Dungeons: FC = () => {
+    const [activePeriod, setActivePeriod] = useState<string | undefined>()
+
     return (
         <Stack>
-            <Stack>
+            <Group justify={'space-between'}>
                 <Title order={2}>Dungeon Popularity</Title>
-                <Suspense fallback={<Skeleton h={470} w={840} ml={60} mb={30} />}>
-                    <DungeonFrequencyChart />
-                </Suspense>
-            </Stack>
+                <PeriodSelect setActivePeriod={setActivePeriod} />
+            </Group>
+            <Suspense fallback={<Skeleton h={470} w={740} mb={30} ml={60} />}>
+                <DungeonFrequencyChart
+                    period={activePeriod ? Number.parseInt(activePeriod) : undefined}
+                    key={`DungeonFrequency${activePeriod}`}
+                />
+            </Suspense>
         </Stack>
     )
 }

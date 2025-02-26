@@ -10,9 +10,9 @@ export const useGetKeystoneFrequency = (
     period?: number,
     dungeon?: number
 ): UseSuspenseQueryResult<KeystoneLevelFrequency[]> => {
-    const path = `/keystone-frequency${period || dungeon ? '?' : ''}${period ? `period=${period}` : ''}${period && dungeon ? '&' : ''}${dungeon ? `&dungeon=${dungeon}` : ''}`
+    const path = `/keystone-frequency${period || dungeon ? '?' : ''}${period ? `period=${period}` : ''}${period && dungeon ? '&' : ''}${dungeon ? `dungeon=${dungeon}` : ''}`
     return useSuspenseQuery<KeystoneLevelFrequency[]>({
-        queryKey: ['KeystoneFrequency'],
+        queryKey: ['KeystoneFrequency', period, dungeon],
         queryFn: () => useFetchData<KeystoneLevelFrequency[]>(path),
     })
 }

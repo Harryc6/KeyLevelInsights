@@ -1,29 +1,36 @@
 import pool from '../utils/db'
 import { DungeonFrequency, KeystoneLevelFrequency, SpecFrequency } from '../types/kli/KeyLevelFrequency'
 
-export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequency[]> => {
+export const getSpecFrequencyReport = async (period?: number, dungeon?: number): Promise<SpecFrequency[]> => {
     const query = `
         WITH expanded_runs AS (
             SELECT
                 a.keystone_level,
                 cast(jsonb_array_elements(a.tank)->>'spec_id' as integer) AS spec_id
-        FROM runs a
-        ${period ? 'WHERE period = $1' : ''}
-
-        UNION ALL
-        SELECT
-            a.keystone_level,
-            cast(jsonb_array_elements(a.healer)->>'spec_id' as integer) AS spec_id
-        FROM runs a
-        ${period ? 'WHERE period = $1' : ''}
-
-        UNION ALL
-        SELECT
-            a.keystone_level,
-            cast(jsonb_array_elements(a.dps)->>'spec_id' as integer) spec_id
-        FROM runs a
-        ${period ? 'WHERE period = $1' : ''}
-            )
+            FROM runs a
+                ${period || dungeon ? 'WHERE' : ''}
+                ${period ? 'period = $1' : ''}
+                ${period && dungeon ? 'AND' : ''}
+                ${dungeon ? `dungeon = ${period ? '$2' : '$1'}` : ''}
+            UNION ALL
+            SELECT
+                a.keystone_level,
+                cast(jsonb_array_elements(a.healer)->>'spec_id' as integer) AS spec_id
+            FROM runs a
+                ${period || dungeon ? 'WHERE' : ''}
+                ${period ? 'period = $1' : ''}
+                ${period && dungeon ? 'AND' : ''}
+                ${dungeon ? `dungeon = ${period ? '$2' : '$1'}` : ''}
+            UNION ALL
+            SELECT
+                a.keystone_level,
+                cast(jsonb_array_elements(a.dps)->>'spec_id' as integer) spec_id
+            FROM runs a
+                ${period || dungeon ? 'WHERE' : ''}
+                ${period ? 'period = $1' : ''}
+                ${period && dungeon ? 'AND' : ''}
+                ${dungeon ? `dungeon = ${period ? '$2' : '$1'}` : ''}
+        )
         SELECT
             keystone_level,
             spec_id,
@@ -32,8 +39,13 @@ export const getSpecFrequencyReport = async (period?: number): Promise<SpecFrequ
         GROUP BY keystone_level, spec_id
         ORDER BY keystone_level, spec_id
     `
+
+    const params = []
+    if (period) params.push(period)
+    if (dungeon) params.push(dungeon)
+
     try {
-        const result = await pool.query<SpecFrequency>(query, period ? [period] : [])
+        const result = await pool.query<SpecFrequency>(query, params)
         return result.rows
     } catch (error) {
         console.error('Error fetching keystone report:', error)
@@ -82,6 +94,18 @@ export const getDungeonFrequencyReport = async (period?: number): Promise<Dungeo
         return await pool.query<DungeonFrequency>(query, period ? [period] : []).then((res) => res.rows)
     } catch (error) {
         console.error('Error counting runs:', error)
+        throw error
+    }
+}
+
+export const getPeriods = async (): Promise<number[]> => {
+    const query = `
+        select distinct period from runs order by period desc
+    `
+    try {
+        return await pool.query(query).then((res) => res.rows.map((row) => row.period))
+    } catch (error) {
+        console.error('Error fetching periods:', error)
         throw error
     }
 }

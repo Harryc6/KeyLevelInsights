@@ -7,8 +7,12 @@ import { allSpecSeries, dpsSpecSeries, healerSpecSeries, tankSpecSeries } from '
 
 export type DisplayType = 'Spec' | 'DPS' | 'Healer' | 'Tank'
 
-const SpecFrequencyChart: FC<{ type: DisplayType }> = ({ type }) => {
-    const { data } = useGetSpecFrequency()
+const SpecFrequencyChart: FC<{ type: DisplayType; period?: number; dungeon?: number }> = ({
+    type,
+    period,
+    dungeon,
+}) => {
+    const { data } = useGetSpecFrequency(period, dungeon)
     const series =
         type === 'Spec'
             ? allSpecSeries

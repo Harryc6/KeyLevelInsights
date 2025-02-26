@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import {
     getDungeonFrequencyReport,
     getKeystoneFrequencyReport,
+    getPeriods,
     getSpecFrequencyReport,
 } from '../services/countKeystoneService'
 import { SpecFrequency, SpecFrequencyReport } from '../types/kli/KeyLevelFrequency'
@@ -48,21 +49,29 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
 }
 
 export const fetchSpecFrequency = async (req: Request, res: Response): Promise<void> => {
-    console.time('Fetching spec frequency')
     const period = parseInt(req.query.period as string)
-    const cacheKey = `specFrequency_${isNaN(period) ? 'all' : period}`
+    const dungeon = parseInt(req.query.dungeon as string)
+    console.time(
+        `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+    )
+    const cacheKey = `specFrequency_period_${isNaN(period) ? 'all' : period}_dungeon_${isNaN(dungeon) ? 'all' : dungeon}`
 
     // Check if the data is in the cache
     const cachedData = cache.get<SpecFrequencyReport[]>(cacheKey)
     if (cachedData) {
         console.log('Returning cached data')
         res.json(cachedData)
-        console.timeEnd('Fetching spec frequency')
+        console.time(
+            `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+        )
         return
     }
 
     // If not in cache, fetch the data from the database
-    return getSpecFrequencyReport(Number.isNaN(period) ? undefined : period)
+    return getSpecFrequencyReport(
+        Number.isNaN(period) ? undefined : period,
+        Number.isNaN(dungeon) ? undefined : dungeon
+    )
         .then((specFrequencies) => {
             const report = convertToSpecFrequenciesToReports(specFrequencies)
             cache.set(cacheKey, report) // Store the result in the cache
@@ -72,7 +81,9 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
             res.status(500).json({ error: 'Failed to fetch spec frequency report' })
         })
         .finally(() => {
-            console.timeEnd('Fetching spec frequency')
+            console.time(
+                `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+            )
         })
 }
 
@@ -131,5 +142,31 @@ export const fetchDungeonFrequency = async (req: Request, res: Response): Promis
         })
         .finally(() => {
             console.timeEnd('Fetching dungeon frequency')
+        })
+}
+
+export const fetchPeriods = async (req: Request, res: Response): Promise<void> => {
+    console.time('Fetching periods')
+    const cacheKey = 'periods'
+
+    // Check if the data is in the cache
+    const cachedData = cache.get(cacheKey)
+    if (cachedData) {
+        console.log('Returning cached data')
+        res.json(cachedData)
+        console.timeEnd('Fetching periods')
+        return
+    }
+
+    return getPeriods()
+        .then((periods) => {
+            cache.set(cacheKey, periods) // Store the result in the cache
+            res.json(periods)
+        })
+        .catch(() => {
+            res.status(500).json({ error: 'Failed to fetch periods' })
+        })
+        .finally(() => {
+            console.timeEnd('Fetching periods')
         })
 }

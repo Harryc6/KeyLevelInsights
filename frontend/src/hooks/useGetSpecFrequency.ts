@@ -44,10 +44,13 @@ export type SpecFrequencyReport = {
     augmentation: number
 }
 
-export const useGetSpecFrequency = (period?: number): UseSuspenseQueryResult<SpecFrequencyReport[]> => {
-    const path = `/spec-frequency${period ? `?period=${period}` : ''}`
+export const useGetSpecFrequency = (
+    period?: number,
+    dungeon?: number
+): UseSuspenseQueryResult<SpecFrequencyReport[]> => {
+    const path = `/spec-frequency${period || dungeon ? '?' : ''}${period ? `period=${period}` : ''}${period && dungeon ? '&' : ''}${dungeon ? `dungeon=${dungeon}` : ''}`
     return useSuspenseQuery<SpecFrequencyReport[]>({
-        queryKey: ['SpecFrequency'],
+        queryKey: ['SpecFrequency', period, dungeon],
         queryFn: () => useFetchData<SpecFrequencyReport[]>(path),
     })
 }

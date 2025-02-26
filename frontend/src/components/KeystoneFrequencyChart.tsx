@@ -1,24 +1,17 @@
-import { FC, useMemo } from 'react'
+import { FC } from 'react'
 import { BarChart } from '@mantine/charts'
 import { useGetKeystoneFrequency } from '../hooks/useGetKeystoneFrequency.ts'
 import { ErrorBoundary } from 'react-error-boundary'
 
-const KeystoneFrequencyChart: FC = () => {
-    const { data } = useGetKeystoneFrequency()
-    const chartData = useMemo(
-        () =>
-            data.map((d) => ({
-                keystoneLevel: d.keystoneLevel !== undefined ? `${d.keystoneLevel}` : 'Unknown',
-                runs: d.runs,
-            })),
-        [data]
-    )
+const KeystoneFrequencyChart: FC<{ period?: number; dungeon?: number }> = ({ period, dungeon }) => {
+    const { data } = useGetKeystoneFrequency(period, dungeon)
+
     return (
         <ErrorBoundary fallback={<div>Failed to load keystone frequency data</div>}>
             <BarChart
                 h={500}
                 w={800}
-                data={chartData}
+                data={data}
                 dataKey={'keystoneLevel'}
                 series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
                 xAxisLabel={'Keystone Level'}
