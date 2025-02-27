@@ -14,7 +14,7 @@ export const Healers: FC = () => {
             <Group justify={'space-between'}>
                 <Title order={2}>Healer Popularity</Title>
                 <Group>
-                    <DungeonSelect setActiveDungeon={setActiveDungeon} />
+                    <DungeonSelect setActiveDungeon={setActiveDungeon} activePeriod={activePeriod} />
                     <PeriodSelect setActivePeriod={setActivePeriod} />
                 </Group>
             </Group>

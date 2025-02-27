@@ -9,6 +9,7 @@ import mythicLeaderboardRoutes from './routes/mythicLeaderboardRoutes'
 import { collectAndStoreRuns } from './services/dataCollectionService'
 import cron from 'node-cron'
 import keystoneFrequencyRoutes from './routes/keystoneFrequencyRoutes'
+import { getCurrentPeriod } from './services/mythicKeystoneService'
 
 // Load environment variables from .env file
 dotenv.config()
@@ -38,6 +39,14 @@ app.get('/', (req: Request, res: Response) => {
 cron.schedule('0 * * * *', () => {
     console.log('Running collectAndStoreRuns() job...')
     collectAndStoreRuns().catch((err) => console.error(err))
+})
+
+// Schedule a job to run collectAndStoreRuns(previousPeriod) every week on a Wednesday at 09:00
+cron.schedule('0 9 * * 3', () => {
+    console.log('Running collectAndStoreRuns() job for previous period...')
+    getCurrentPeriod()
+        .then((period) => collectAndStoreRuns(period - 1))
+        .catch((err) => console.error(err))
 })
 
 // updateAllExpansionsRuns()

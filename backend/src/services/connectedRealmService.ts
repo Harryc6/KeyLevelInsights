@@ -46,7 +46,9 @@ export const getConnectedRealmIDs = async (): Promise<number[]> => {
         bNetPathBuilder(`/search/connected-realm`, new URLSearchParams({ orderby: 'id' }))
     )
         .then((paginatedConnectedRealms) => {
-            return paginatedConnectedRealms?.results.map((connectedRealm) => connectedRealm.data.id)
+            return paginatedConnectedRealms?.results
+                .map((connectedRealm) => connectedRealm.data.id)
+                .filter((id) => id !== 5911) // Remove unused but returned connected realm ID
         })
         .catch((error) => {
             console.error('Error fetching connected realm IDs:', error)

@@ -1,4 +1,10 @@
-export const tankSpecSeries = [
+export type Series = {
+    label: string
+    name: string
+    color: string
+}
+
+export const tankSpecSeries: Series[] = [
     { label: 'Blood', name: 'blood', color: '#C41E3A' },
     { label: 'Brewmaster', name: 'brewmaster', color: '#00FF98' },
     { label: 'Guardian', name: 'guardian', color: '#FF7C0A' },
@@ -7,7 +13,7 @@ export const tankSpecSeries = [
     { label: 'Vengeance', name: 'vengeance', color: '#A330C9' },
 ]
 
-export const healerSpecSeries = [
+export const healerSpecSeries: Series[] = [
     { label: 'Discipline', name: 'discipline', color: '#FFFFFF' },
     { label: 'Holy', name: 'holyPaladin', color: '#F48CBA' },
     { label: 'Holy', name: 'holyPriest', color: '#FFFFFF' },
@@ -17,7 +23,7 @@ export const healerSpecSeries = [
     { label: 'Restoration', name: 'restorationShaman', color: '#0070DD' },
 ]
 
-export const dpsSpecSeries = [
+export const dpsSpecSeries: Series[] = [
     { label: 'Affliction', name: 'affliction', color: '#8788EE' },
     { label: 'Arcane', name: 'arcane', color: '#3FC7EB' },
     { label: 'Arms', name: 'arms', color: '#C69B6D' },
@@ -46,15 +52,28 @@ export const dpsSpecSeries = [
     { label: 'Windwalker', name: 'windwalker', color: '#00FF98' },
 ]
 
-export const allSpecSeries = tankSpecSeries.concat(healerSpecSeries).concat(dpsSpecSeries)
+export const allSpecSeries: Series[] = tankSpecSeries.concat(healerSpecSeries).concat(dpsSpecSeries)
 
-export const dungeonSeries = [
-    { label: 'Ara Kara', name: '503', color: '#c35073' },
-    { label: 'Stonevault', name: '501', color: '#b55d31' },
-    { label: 'Dawnbreaker', name: '505', color: '#9e5ae1' },
+export const ttwS1DungeonSeries: Series[] = [
+    { label: 'Ara-Kara, City of Echoes', name: '503', color: '#c35073' },
+    { label: 'The Stonevault', name: '501', color: '#b55d31' },
+    { label: 'The Dawnbreaker', name: '505', color: '#9e5ae1' },
     { label: 'Grim Batol', name: '507', color: '#995f7a' },
     { label: 'Siege of Boralus', name: '353', color: '#b5792f' },
     { label: 'City Of Threads', name: '502', color: '#6d1a2e' },
-    { label: 'Necrotic Wake', name: '376', color: '#2e6c4f' },
-    { label: 'Mists Of Tirna Scithe', name: '375', color: '#2b38bc' },
+    { label: 'The Necrotic Wake', name: '376', color: '#2e6c4f' },
+    { label: 'Mists of Tirna Scithe', name: '375', color: '#2b38bc' },
 ]
+
+export const ttwS2DungeonSeries: Series[] = [
+    { label: 'Priory', name: '499', color: '#fdf891' },
+    { label: 'Rookery', name: '500', color: '#3f88e0' },
+    { label: 'Darkflame Cleft', name: '504', color: '#850efd' },
+    { label: 'Cinderbrew Meadery', name: '506', color: '#f06d36' },
+    { label: 'Operation: Floodgate', name: '525', color: '#b52f2f' },
+    { label: 'Theater of Pain', name: '382', color: '#1a6049' },
+    { label: 'Workshop', name: '370', color: '#8b4106' },
+    { label: 'Motherlode', name: '247', color: '#3e1ba6' },
+]
+
+export const dungeonSeries: Series[] = [...ttwS1DungeonSeries, ...ttwS2DungeonSeries]

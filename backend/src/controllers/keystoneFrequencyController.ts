@@ -61,7 +61,7 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
     if (cachedData) {
         console.log('Returning cached data')
         res.json(cachedData)
-        console.time(
+        console.timeEnd(
             `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
         )
         return
@@ -81,7 +81,7 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
             res.status(500).json({ error: 'Failed to fetch spec frequency report' })
         })
         .finally(() => {
-            console.time(
+            console.timeEnd(
                 `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
             )
         })

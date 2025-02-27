@@ -14,7 +14,15 @@ const PeriodSelect: FC<{ setActivePeriod: Dispatch<SetStateAction<string | undef
         [data]
     )
 
-    return <Select size={'xs'} data={periods} defaultValue={''} onChange={(value) => setActivePeriod(value ?? '')} />
+    return (
+        <Select
+            size={'xs'}
+            data={periods}
+            defaultValue={''}
+            onChange={(value) => setActivePeriod(value ?? '')}
+            allowDeselect={false}
+        />
+    )
 }
 
 export default PeriodSelect

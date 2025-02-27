@@ -43,19 +43,11 @@ export default SpecFrequencyChart
 export const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: ChartSeries[] }> = ({ props, series }) => {
     if (!props.payload) return null
 
-    const content = props.payload.map((item) => (
-        <Group key={item.payload + 'group'} style={{ display: 'flex', justifyContent: 'space-between' }}>
+    const content = props.payload.map((item, index) => (
+        <Group key={`TooltipGroup${index}`} style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Group>
                 <svg height={12} width={12}>
-                    <circle
-                        key={item.payload + 'circle'}
-                        r={6}
-                        fill={item.color}
-                        width={12}
-                        height={12}
-                        cx={6}
-                        cy={6}
-                    />
+                    <circle r={6} fill={item.color} width={12} height={12} cx={6} cy={6} />
                 </svg>
                 <Text size={'sm'} style={{ color: 'var(--mantine-color-text)' }}>
                     {series.find((value) => value.name === item.name)?.label ?? item.name}

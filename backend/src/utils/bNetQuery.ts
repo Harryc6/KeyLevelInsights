@@ -38,17 +38,17 @@ export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
                 await new Promise((resolve) => setTimeout(resolve, delay))
                 delay *= 2 // Exponential backoff
                 continue
-            } else if (isAxiosError(error) && error.response?.status === 429) {
+            } else if (isAxiosError(error) && error.response?.status === 429 && attempt < retries - 1) {
                 console.warn('Rate limited by the Blizzard API, retrying in 5 seconds...')
                 await new Promise((resolve) => setTimeout(resolve, 5000))
                 delay *= 2 // Exponential backoff
                 continue
             } else if (isAxiosError(error)) {
-                console.error('Blizzard API request failed:', error.message)
+                console.error(`Blizzard API request failed with status code ${error.response?.status}`, path)
                 throw new Error(`Blizzard API request failed with status code ${error.response?.status}`)
             }
-            console.error('Blizzard API request failed:', isAxiosError(error) ? error.message : error)
-            throw new Error('Blizzard API request failed:' + (isAxiosError(error) ? error.message : error))
+            console.error('Blizzard API request failed:', error)
+            throw new Error('Blizzard API request failed:' + error)
         }
     }
     console.error(`Failed to fetch data from ${path} after ${retries} attempts`)
