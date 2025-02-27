@@ -1,24 +1,23 @@
 import { Dispatch, FC, SetStateAction, useMemo } from 'react'
 import { Select } from '@mantine/core'
-import { useGetPeriods } from '../hooks/useGetPeriods.ts'
 
-const PeriodSelect: FC<{ setActivePeriod: Dispatch<SetStateAction<string | undefined>> }> = ({ setActivePeriod }) => {
-    const { data } = useGetPeriods()
-
-    const periods = useMemo(
+const PeriodSelect: FC<{ periods: number[]; setActivePeriod: Dispatch<SetStateAction<string | undefined>> }> = ({
+    periods,
+    setActivePeriod,
+}) => {
+    const data = useMemo(
         () => [
-            { value: '', label: 'All Periods' },
-            { value: data[0].toString(), label: data[0].toString() + ' (Current)' },
-            ...data.slice(1).map((value) => ({ value: value.toString(), label: value.toString() })),
+            { value: periods[0].toString(), label: periods[0].toString() + ' (Current)' },
+            ...periods.slice(1).map((value) => ({ value: value.toString(), label: value.toString() })),
         ],
-        [data]
+        [periods]
     )
 
     return (
         <Select
             size={'xs'}
-            data={periods}
-            defaultValue={''}
+            data={data}
+            defaultValue={periods[0].toString()}
             onChange={(value) => setActivePeriod(value ?? '')}
             allowDeselect={false}
         />
