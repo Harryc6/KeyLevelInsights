@@ -12,7 +12,7 @@ import '@mantine/core/styles.css'
 import '@mantine/charts/styles.css'
 // Import custom styles
 import './index.css'
-import { darkShade, darkText } from './utils/constants.ts'
+import { darkShade, lightText } from './utils/constants.ts'
 
 const theme = createTheme({
     fontFamily: `Gotham, ${DEFAULT_THEME.fontFamily}`,
@@ -28,9 +28,6 @@ const theme = createTheme({
             },
         }),
     },
-    // variantColorResolver: (color) => {
-    //     return color
-    // },
     breakpoints: {
         xs: '30em',
         sm: '60em',
@@ -133,7 +130,7 @@ const resolver = (theme: MantineTheme) => ({
     },
     light: {
         '--mantine-color-body': darkShade,
-        '--mantine-color-text': darkText,
+        '--mantine-color-text': lightText,
     },
     dark: {},
 })
