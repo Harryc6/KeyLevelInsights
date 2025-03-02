@@ -1,6 +1,6 @@
 export const darkShade = '#433343'
 export const darkAccent = '#A69D97'
-export const darkText = '#251E25'
+export const darkText = '#FDFDFD'
 export const lightShade = '#F9F7F7'
 export const lightAccent = '#C9A8AB'
 export const lightText = '#251E25'
