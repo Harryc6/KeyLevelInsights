@@ -119,8 +119,8 @@ const convertSpecIdToName = (specId: SpecId): SpecName => {
 }
 
 export const fetchDungeonFrequency = async (req: Request, res: Response): Promise<void> => {
-    console.time('Fetching dungeon frequency')
     const period = parseInt(req.query.period as string)
+    console.time(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
     const cacheKey = `dungeonFrequency_${isNaN(period) ? 'all' : period}`
 
     // Check if the data is in the cache
@@ -128,7 +128,7 @@ export const fetchDungeonFrequency = async (req: Request, res: Response): Promis
     if (cachedData) {
         console.log('Returning cached data')
         res.json(cachedData)
-        console.timeEnd('Fetching dungeon frequency')
+        console.timeEnd(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
         return
     }
 
@@ -141,7 +141,7 @@ export const fetchDungeonFrequency = async (req: Request, res: Response): Promis
             res.status(500).json({ error: 'Failed to fetch dungeon frequency report' })
         })
         .finally(() => {
-            console.timeEnd('Fetching dungeon frequency')
+            console.timeEnd(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
         })
 }
 

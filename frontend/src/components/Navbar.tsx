@@ -1,51 +1,47 @@
 import { FC } from 'react'
-import { NavLink, Stack } from '@mantine/core'
-import { IconCrop169, IconHourglass, IconShield, IconSword } from '@tabler/icons-react'
+import { Button, ButtonProps } from '@mantine/core'
 import { useNavigate } from 'react-router'
+import { brandColor, lightText } from '../utils/constants.ts'
 
-export const Navbar: FC = () => {
+export const Navbar: FC<{ toggle: () => void; compact?: boolean }> = ({ toggle, compact }) => {
     const currentUrl = window.location.pathname
     const navigate = useNavigate()
+
+    function navigateAndToggle(url: string) {
+        navigate(url)
+        toggle()
+    }
+
+    const activeTabStyle = { textDecoration: `underline ${brandColor} 4px` }
+
+    const buttons = [
+        { label: 'DPS', url: '/dps' },
+        { label: 'Healers', url: '/healers' },
+        { label: 'Tanks', url: '/tanks' },
+        { label: 'Dungeons', url: '/dungeons' },
+    ]
+
+    const props: Partial<ButtonProps> = compact
+        ? { size: 'compact-lg', h: 30, w: 110 }
+        : { size: 'lg', h: 40, fullWidth: true }
+
     return (
-        <Stack gap={5} w={'100%'}>
-            <NavLink
-                onClick={() => navigate('/dps')}
-                label={'DPS'}
-                active={currentUrl.startsWith('/dps')}
-                leftSection={<IconSword size={20} stroke={1.5} />}
-            />
-            <NavLink
-                onClick={() => navigate('/healers')}
-                label={'Healers'}
-                active={currentUrl.startsWith('/healers')}
-                // there is no suitable icon for healers, so improvise until going to a new icon library
-                leftSection={
-                    <div style={{ position: 'relative', width: 20, height: 20 }}>
-                        <IconCrop169
-                            size={20}
-                            stroke={1.5}
-                            style={{ position: 'absolute', transform: 'rotate(0deg)' }}
-                        />
-                        <IconCrop169
-                            size={20}
-                            stroke={1.5}
-                            style={{ position: 'absolute', transform: 'rotate(90deg)' }}
-                        />
-                    </div>
-                }
-            />
-            <NavLink
-                onClick={() => navigate('/tanks')}
-                label={'Tanks'}
-                active={currentUrl.startsWith('/tanks')}
-                leftSection={<IconShield size={20} stroke={1.5} />}
-            />
-            <NavLink
-                onClick={() => navigate('/dungeons')}
-                label={'Dungeons'}
-                active={currentUrl.startsWith('/dungeons')}
-                leftSection={<IconHourglass size={20} stroke={1.5} />}
-            />
-        </Stack>
+        <>
+            {buttons.map(({ label, url }) => (
+                <Button
+                    key={url}
+                    onClick={() => navigateAndToggle(url)}
+                    color={brandColor}
+                    c={lightText}
+                    variant={'subtle'}
+                    size={'compact-lg'}
+                    radius={'lg'}
+                    {...props}
+                    style={currentUrl === url ? activeTabStyle : {}}
+                >
+                    {label}
+                </Button>
+            ))}
+        </>
     )
 }

@@ -49,6 +49,7 @@ cron.schedule('0 9 * * 3', () => {
         .catch((err) => console.error(err))
 })
 
+collectAndStoreRuns()
 // updateAllExpansionsRuns()
 
 // Start the server and listen on the specified port

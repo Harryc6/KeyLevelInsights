@@ -1,68 +1,80 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /*--palette-1: #500085;*/
+  /*--palette-2: #1B263B;*/
+  /*--palette-3: #415A77;*/
+  /*--palette-4: #778DA9;*/
+  /*--palette-5: #E0E1DD;*/
+
+  /*--light-backgroud: #fffffe;*/
+  /*--light-title-color: #181818;*/
+  /*--light-paragarph-color: #2e2e2e;*/
+  /*--light-link-color: #50c4cf;*/
+  /*--light-card-background: #ddd6d6;*/
+
+  /*--highlight-color: #fbdd74;*/
+
+
+
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+:root[data-mantine-color-scheme="light"] {
+  /*--mantine-color-body: var(--palette-4);*/
+  /*--app-shell-border-color: var(--palette-3);*/
+  /*--input-color: #fff;*/
+
+  /*background-color: var(--mantine-color-body)*/
+
+  /*--mantine-color-body: #433343;*/
+
+
 }
-a:hover {
-  color: #535bf2;
+
+:root[data-mantine-color-scheme="dark"] {
+  /*--mantine-color-body: #433343;*/
+
+  /*!*!* border color *!*!*/
+  /*--mantine-color-dark-4: var(--mantine-color-slate-8);*/
+  /*--app-shell-border-color: var(--palette-2);*/
+  /*!*!* text color *!*!*/
+  /*--mantine-color-text: var(--mantine-color-slate-1);*/
+  /*--mantine-text-color: var(--mantine-color-slate-1);*/
+  /*!*!* input background *!*!*/
+  /*--mantine-color-dark-6: var(--mantine-color-slate-8);*/
+  /*--input-bg: var(--palette-1);*/
+
+
+  /*--dark-backgroud: #181818;*/
+  /*--dark-title-color: #fffffe;*/
+  /*--dark-paragarph-color: #ddd6d6;*/
+  /*--dark-link-color: #50c4cf;*/
+  /*--dark-secondary-background: #2e2e2e;*/
+
+  /*--mantine-color-body: #2f4757;*/
+
+  /*!* border color *!*/
+  /*--mantine-color-dark-4: var(--dark-secondary-background);*/
+  /*--app-shell-border-color: var(--dark-secondary-background);*/
+  /*!* text color *!*/
+  /*--mantine-color-text: #c8ba96;*/
+  /*--mantine-text-color: var(--dark-title-color);*/
+  /*!* input background *!*/
+  /*--mantine-color-dark-6: var(--palette-1);*/
+  /*--input-bg: var(--palette-1);*/
+  /*!* input text color *!*/
+  /*  --input-color: red;*/
+
 }
 
 body {
-  margin: 0;
+  /*margin: 0;*/
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 98vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
