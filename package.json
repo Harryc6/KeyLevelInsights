@@ -4,7 +4,9 @@
   "description": "A full-stack project to track and visualize dungeon performance stats from Warcraft Logs.",
   "scripts": {
     "start-install": "npm install",
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "install-all": "npm run install-backend && npm run install-frontend",
 
     "build-backend": "cd backend && npm run build",
     "build-frontend": "cd frontend && npm run build",
@@ -13,9 +15,9 @@
     "start-frontend": "cd frontend && npm run preview",
     "start-backend": "cd backend && npm run start",
 
-    "dev": "concurrently \"npm run dev-backend\" \"npm run dev-frontend\"",
     "dev-backend": "cd backend && npm run dev",
-    "dev-frontend": "cd frontend && npm run dev"
+    "dev-frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev-backend\" \"npm run dev-frontend\""
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^8.22.0",
