@@ -17,7 +17,7 @@ const limiter = new Bottleneck({
 })
 
 export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
-    const token = await getValidBNetAccessToken()
+    let token = await getValidBNetAccessToken()
     const retries: number = 3
     let delay: number = 1000
 
@@ -42,6 +42,10 @@ export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
                 console.warn('Rate limited by the Blizzard API, retrying in 5 seconds...')
                 await new Promise((resolve) => setTimeout(resolve, 5000))
                 delay *= 2 // Exponential backoff
+                continue
+            } else if (isAxiosError(error) && error.response?.status === 401 && attempt < retries - 1) {
+                console.warn('Access token expired, refreshing token...')
+                token = await getValidBNetAccessToken()
                 continue
             } else if (isAxiosError(error)) {
                 console.error(`Blizzard API request failed with status code ${error.response?.status}`, path)
