@@ -29,7 +29,7 @@ app.use(`/api`, mythicLeaderboardRoutes)
 app.use(`/api`, keystoneFrequencyRoutes)
 
 // Define a simple route to test the server
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_: Request, res: Response) => {
     // const val = executeBNetQuery(bNetPathBuilder(`/keystone-affix/index`, undefined, undefined, `static-eu`))
     // Promise.resolve(val).then((val) => res.send(JSON.stringify(val, null, 2)))
     res.send('Hello, World!')
