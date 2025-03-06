@@ -2,7 +2,7 @@ import { getConnectedRealmIDs } from './connectedRealmService'
 import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
 import { insertCharacters, insertRuns } from './insertService'
-import { dpsIDs, dungeonIDs, dungeonMap, healerIDs, tankIDs } from '../types/kli/map'
+import { dpsIDs, healerIDs, tankIDs, getDungeonMapByPeriod, getDungeonIDsByPeriod } from '../types/kli/map'
 import { LeadingGroup, Member } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
 
@@ -18,7 +18,9 @@ export const updateAllExpansionsRuns = async () => {
 export const collectAndStoreRuns = async (period?: number) => {
     const [connectedRealmIDs, currentPeriod] = await Promise.all([getConnectedRealmIDs(), getCurrentPeriod()])
     console.time(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
-    for (const dungeonID of dungeonIDs) {
+    const dungeonIDsList = getDungeonIDsByPeriod(period ?? currentPeriod)
+
+    for (const dungeonID of dungeonIDsList) {
         await collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, period ?? currentPeriod)
     }
     console.timeEnd(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
@@ -27,6 +29,7 @@ export const collectAndStoreRuns = async (period?: number) => {
 }
 
 async function collectAndStoreRunsByDungeon(dungeon: number, connectedRealmIDs: number[], period: number) {
+    const dungeonMap = getDungeonMapByPeriod(period)
     console.log(`Collecting leaderboards for ${dungeonMap.get(dungeon)} for period ${period}`)
     console.time(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
     const leaderboards: LeadingGroup[] = await fetchLeaderboards(connectedRealmIDs, dungeon, period)

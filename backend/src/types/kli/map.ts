@@ -92,7 +92,7 @@ export const specIds = [
 
 export type SpecId = (typeof specIds)[number]
 
-export const dungeonMap = new Map<number, string>([
+export const twwDungeonS1Map = new Map<number, string>([
     [503, 'Ara Kara'],
     [501, 'Stonevault'],
     [505, 'Dawn Breaker'],
@@ -103,7 +103,23 @@ export const dungeonMap = new Map<number, string>([
     [375, 'Mist Of Tirna Scithe'],
 ])
 
-export const dungeonIDs = Array.from(dungeonMap.keys())
+export const twwDungeonS1IDs = Array.from(twwDungeonS1Map.keys())
+
+export const twwDungeonS2Map = new Map<number, string>([
+    [499, 'Priory'],
+    [500, 'Rookery'],
+    [504, 'Darkflame Cleft'],
+    [506, 'Cinderbrew Meadery'],
+    [525, 'Operation: Floodgate'],
+    [382, 'Theater of Pain'],
+    [370, 'Workshop'],
+    [247, 'Motherlode'],
+])
+
+export const twwDungeonS2IDs = Array.from(twwDungeonS2Map.keys())
+
+export const getDungeonMapByPeriod = (period: number) => (period > 1000 ? twwDungeonS2Map : twwDungeonS1Map)
+export const getDungeonIDsByPeriod = (period: number) => (period > 1000 ? twwDungeonS2IDs : twwDungeonS1IDs)
 
 export const tankSpecMap = new Map<number, string>([
     [66, 'Protection - Paladin'],
