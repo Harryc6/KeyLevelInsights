@@ -15,6 +15,7 @@ const KeystoneFrequencyChart: FC<{ period?: number; dungeon?: number }> = ({ per
                 dataKey={'keystoneLevel'}
                 series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
                 xAxisLabel={'Keystone Level'}
+                withTooltip={false}
             />
         </ErrorBoundary>
     )

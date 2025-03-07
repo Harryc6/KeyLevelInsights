@@ -4,6 +4,7 @@ import { BarChart, ChartSeries } from '@mantine/charts'
 import { TooltipProps } from 'recharts'
 import { Group, Paper, Text } from '@mantine/core'
 import { allSpecSeries, dpsSpecSeries, healerSpecSeries, tankSpecSeries } from '../utils/series.ts'
+import { lightShade } from '../utils/constants.ts'
 
 export type DisplayType = 'Spec' | 'DPS' | 'Healer' | 'Tank'
 
@@ -60,7 +61,7 @@ export const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: Cha
     ))
 
     return (
-        <Paper withBorder style={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
+        <Paper withBorder style={{ display: 'flex', flexDirection: 'column', minWidth: 200, background: lightShade }}>
             <Text fw={500} pt={'xs'} pl={'md'} pr={'md'} style={{ color: 'var(--mantine-color-bright)' }}>
                 Keystone Level: {props.label}
             </Text>
