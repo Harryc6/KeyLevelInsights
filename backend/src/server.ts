@@ -32,7 +32,7 @@ app.use(`/api`, keystoneFrequencyRoutes)
 app.get('/', (_: Request, res: Response) => {
     // const val = executeBNetQuery(bNetPathBuilder(`/keystone-affix/index`, undefined, undefined, `static-eu`))
     // Promise.resolve(val).then((val) => res.send(JSON.stringify(val, null, 2)))
-    res.send('Hello, World!')
+    res.send('Hello, this is the backend server!')
 })
 
 // Schedule a job to run collectAndStoreRuns() every hour
@@ -49,7 +49,7 @@ cron.schedule('0 9 * * 3', () => {
         .catch((err) => console.error(err))
 })
 
-collectAndStoreRuns()
+// collectAndStoreRuns()
 // updateAllExpansionsRuns()
 
 // Start the server and listen on the specified port
