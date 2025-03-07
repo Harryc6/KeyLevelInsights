@@ -13,17 +13,15 @@ type OAuthResponse = {
 const getWCLAccessToken = async (): Promise<string> => {
     const CLIENT_ID = process.env.WCL_CLIENT_ID!
     const CLIENT_SECRET = process.env.WCL_CLIENT_SECRET!
-    const TOKEN_URL = process.env.WCL_TOKEN_URL!
 
-    return getValidAccessToken(CLIENT_ID, CLIENT_SECRET, TOKEN_URL, 'WCL')
+    return getValidAccessToken(CLIENT_ID, CLIENT_SECRET, 'https://www.warcraftlogs.com/oauth/token', 'WCL')
 }
 
 const getBNetAccessToken = async (): Promise<string> => {
     const CLIENT_ID = process.env.BNET_CLIENT_ID!
     const CLIENT_SECRET = process.env.BNET_CLIENT_SECRET!
-    const TOKEN_URL = process.env.BNET_TOKEN_URL!
 
-    return getValidAccessToken(CLIENT_ID, CLIENT_SECRET, TOKEN_URL, 'BNET')
+    return getValidAccessToken(CLIENT_ID, CLIENT_SECRET, 'https://oauth.battle.net/token', 'BNET')
 }
 
 const getValidAccessToken = async (

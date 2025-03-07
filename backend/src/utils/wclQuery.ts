@@ -10,11 +10,10 @@ export type GraphQLResponse<T> = { data: T }
  */
 export const executeWCLQuery = async <T>(query: string): Promise<T> => {
     const token = await getValidWCLAccessToken()
-    const GRAPHQL_API_URL = process.env.WCL_API_URL
 
     return axios
         .post<GraphQLResponse<T>>(
-            GRAPHQL_API_URL!,
+            'https://www.warcraftlogs.com/api/v2/client',
             { query },
             {
                 headers: {
