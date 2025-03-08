@@ -6,8 +6,8 @@ export type DungeonFrequency = {
     runs: number
 }
 
-export const useGetDungeonFrequency = (period?: number): UseSuspenseQueryResult<DungeonFrequency[]> => {
-    const path = `/dungeon-frequency${period ? `?period=${period}` : ''}`
+export const useGetDungeonFrequency = (period: number): UseSuspenseQueryResult<DungeonFrequency[]> => {
+    const path = `/dungeon-frequency/${period}`
     return useSuspenseQuery<DungeonFrequency[]>({
         queryKey: ['DungeonFrequency', period],
         queryFn: () => useFetchData<DungeonFrequency[]>(path),

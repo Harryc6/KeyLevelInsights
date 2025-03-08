@@ -45,6 +45,53 @@ export const specNames = [
 
 export type SpecName = (typeof specNames)[number]
 
+export const specDBNames = [
+    // Tanks
+    'blood',
+    'brewmaster',
+    'guardian',
+    'protection_paladin',
+    'protection_warrior',
+    'vengeance',
+    // Healers
+    'discipline',
+    'holy_paladin',
+    'holy_priest',
+    'mistweaver',
+    'preservation',
+    'restoration_druid',
+    'restoration_shaman',
+    // DPS
+    'affliction',
+    'arcane',
+    'arms',
+    'assassination',
+    'augmentation',
+    'balance',
+    'beast_mastery',
+    'demonology',
+    'destruction',
+    'devastation',
+    'elemental',
+    'enhancement',
+    'feral',
+    'fire',
+    'frost_death_knight',
+    'frost_mage',
+    'fury',
+    'havoc',
+    'marksmanship',
+    'outlaw',
+    'retribution',
+    'shadow',
+    'subtlety',
+    'survival',
+    'unholy',
+    'windwalker',
+] as const
+
+export type SpecDBName = (typeof specDBNames)[number]
+
 export const specIds = [
     // Tanks
     250, // Blood

@@ -5,19 +5,18 @@ import {
     getPeriods,
     getSpecFrequencyReport,
 } from '../services/countKeystoneService'
-import { SpecFrequency, SpecFrequencyReport } from '../types/kli/KeyLevelFrequency'
-import { SpecId, specIds, SpecName, specNames } from '../types/kli/map'
+import { SpecFrequencyReport } from '../types/kli/KeyLevelFrequency'
+import { SpecDBName, specDBNames, specNames } from '../types/kli/map'
 import NodeCache from 'node-cache'
+import { SpecFrequency } from '../models/keystoneFrequency'
 
 const cache = new NodeCache({ stdTTL: 3600 }) // Cache TTL of 1 hour
 
 export const fetchKeystoneFrequency = async (req: Request, res: Response): Promise<void> => {
-    const period = parseInt(req.query.period as string)
+    const period = parseInt(req.params.period as string)
     const dungeon = parseInt(req.query.dungeon as string)
-    console.time(
-        `Fetching keystone frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
-    )
-    const cacheKey = `keystoneFrequency_period_${isNaN(period) ? 'all' : period}_dungeon_${isNaN(dungeon) ? 'all' : dungeon}`
+    console.time(`Fetching keystone frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`)
+    const cacheKey = `keystoneFrequency_period_${period}_dungeon_${isNaN(dungeon) ? 'all' : dungeon}`
 
     // Check if the data is in the cache
     const cachedData = cache.get(cacheKey)
@@ -25,15 +24,12 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
         console.log('Returning cached data')
         res.json(cachedData)
         console.timeEnd(
-            `Fetching keystone frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+            `Fetching keystone frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`
         )
         return
     }
 
-    return getKeystoneFrequencyReport(
-        Number.isNaN(period) ? undefined : period,
-        Number.isNaN(dungeon) ? undefined : dungeon
-    )
+    return getKeystoneFrequencyReport(period, Number.isNaN(dungeon) ? undefined : dungeon)
         .then((keystoneFrequency) => {
             cache.set(cacheKey, keystoneFrequency) // Store the result in the cache
             res.json(keystoneFrequency)
@@ -43,35 +39,28 @@ export const fetchKeystoneFrequency = async (req: Request, res: Response): Promi
         })
         .finally(() => {
             console.timeEnd(
-                `Fetching keystone frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+                `Fetching keystone frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`
             )
         })
 }
 
 export const fetchSpecFrequency = async (req: Request, res: Response): Promise<void> => {
-    const period = parseInt(req.query.period as string)
+    const period = parseInt(req.params.period as string)
     const dungeon = parseInt(req.query.dungeon as string)
-    console.time(
-        `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
-    )
-    const cacheKey = `specFrequency_period_${isNaN(period) ? 'all' : period}_dungeon_${isNaN(dungeon) ? 'all' : dungeon}`
+    console.time(`Fetching spec frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`)
+    const cacheKey = `specFrequency_period_${period}_dungeon_${isNaN(dungeon) ? 'all' : dungeon}`
 
     // Check if the data is in the cache
     const cachedData = cache.get<SpecFrequencyReport[]>(cacheKey)
     if (cachedData) {
         console.log('Returning cached data')
         res.json(cachedData)
-        console.timeEnd(
-            `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
-        )
+        console.timeEnd(`Fetching spec frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`)
         return
     }
 
     // If not in cache, fetch the data from the database
-    return getSpecFrequencyReport(
-        Number.isNaN(period) ? undefined : period,
-        Number.isNaN(dungeon) ? undefined : dungeon
-    )
+    return getSpecFrequencyReport(period, Number.isNaN(dungeon) ? undefined : dungeon)
         .then((specFrequencies) => {
             const report = convertToSpecFrequenciesToReports(specFrequencies)
             cache.set(cacheKey, report) // Store the result in the cache
@@ -82,57 +71,42 @@ export const fetchSpecFrequency = async (req: Request, res: Response): Promise<v
         })
         .finally(() => {
             console.timeEnd(
-                `Fetching spec frequency${period ? ` for period ${period}` : ''}${period && dungeon ? ' and' : ''}${dungeon ? ` for dungeon ${dungeon}` : ''}`
+                `Fetching spec frequency for period ${period}${dungeon ? ` and for dungeon ${dungeon}` : ''}`
             )
         })
 }
 
 const convertToSpecFrequenciesToReports = (specFrequencies: SpecFrequency[]): SpecFrequencyReport[] => {
-    const specFrequencyReport: SpecFrequencyReport[] = []
-    specFrequencies.forEach((specFrequency) => {
-        const specName = convertSpecIdToName(specFrequency.spec_id)
+    return specFrequencies.map((specFrequency) => {
+        const keys = Object.keys(specFrequency).filter((key) => key !== 'keystone_level')
 
-        if (!specName) {
-            console.error(`Spec ID ${specFrequency.spec_id} does not have a corresponding name.`)
-            return
-        }
-
-        // find any existing report for this keystone level
-        const existingReport = specFrequencyReport.find(
-            (report) => report.keystoneLevel === specFrequency.keystone_level
-        )
-        if (existingReport) {
-            existingReport[specName] = specFrequency.runs
-            return
-        }
-
-        specFrequencyReport.push({
+        return {
             keystoneLevel: specFrequency.keystone_level,
-            [specName]: specFrequency.runs,
-        })
+            ...Object.fromEntries(
+                keys.map((key: string) => [
+                    specNames[specDBNames.indexOf(key as SpecDBName)],
+                    specFrequency[key as SpecDBName],
+                ])
+            ),
+        }
     })
-    return specFrequencyReport
-}
-
-const convertSpecIdToName = (specId: SpecId): SpecName => {
-    return specNames[specIds.indexOf(specId)]
 }
 
 export const fetchDungeonFrequency = async (req: Request, res: Response): Promise<void> => {
-    const period = parseInt(req.query.period as string)
-    console.time(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
-    const cacheKey = `dungeonFrequency_${isNaN(period) ? 'all' : period}`
+    const period = parseInt(req.params.period as string)
+    console.time(`Fetching dungeon frequency for period ${period}`)
+    const cacheKey = `dungeonFrequency_${period}`
 
     // Check if the data is in the cache
     const cachedData = cache.get(cacheKey)
     if (cachedData) {
         console.log('Returning cached data')
         res.json(cachedData)
-        console.timeEnd(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
+        console.timeEnd(`Fetching dungeon frequency for period ${period}`)
         return
     }
 
-    return getDungeonFrequencyReport(Number.isNaN(period) ? undefined : period)
+    return getDungeonFrequencyReport(period)
         .then((dungeonFrequency) => {
             cache.set(cacheKey, dungeonFrequency) // Store the result in the cache
             res.json(dungeonFrequency)
@@ -141,11 +115,11 @@ export const fetchDungeonFrequency = async (req: Request, res: Response): Promis
             res.status(500).json({ error: 'Failed to fetch dungeon frequency report' })
         })
         .finally(() => {
-            console.timeEnd(`Fetching dungeon frequency${period ? ` for period ${period}` : ''}`)
+            console.timeEnd(`Fetching dungeon frequency for period ${period}`)
         })
 }
 
-export const fetchPeriods = async (req: Request, res: Response): Promise<void> => {
+export const fetchPeriods = async (_: Request, res: Response): Promise<void> => {
     console.time('Fetching periods')
     const cacheKey = 'periods'
 

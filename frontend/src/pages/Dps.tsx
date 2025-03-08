@@ -9,7 +9,7 @@ const SpecFrequencyChart = lazy(() => import('../components/SpecFrequencyChart')
 
 export const Dps: FC = () => {
     const { data: periods } = useGetPeriods()
-    const [activePeriod, setActivePeriod] = useState<string | undefined>(periods[0].toString())
+    const [activePeriod, setActivePeriod] = useState<string>(periods[0].toString())
     const [activeDungeon, setActiveDungeon] = useState<string | undefined>()
 
     return (
@@ -25,7 +25,7 @@ export const Dps: FC = () => {
                 <Suspense fallback={<Skeleton h={595} w={740} ml={60} mb={5} />}>
                     <SpecFrequencyChart
                         type={'DPS'}
-                        period={activePeriod ? Number.parseInt(activePeriod) : undefined}
+                        period={Number.parseInt(activePeriod)}
                         dungeon={activeDungeon ? Number.parseInt(activeDungeon) : undefined}
                         key={`SpecFrequencyChart${'Period' + activePeriod}${'Dungeon' + activeDungeon}`}
                     />

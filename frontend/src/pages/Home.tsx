@@ -9,7 +9,7 @@ const KeystoneFrequencyChart = lazy(() => import('../components/KeystoneFrequenc
 
 export const Home: FC = () => {
     const { data: periods } = useGetPeriods()
-    const [activePeriod, setActivePeriod] = useState<string | undefined>(periods[0].toString())
+    const [activePeriod, setActivePeriod] = useState<string>(periods[0].toString())
     const [activeDungeon, setActiveDungeon] = useState<string | undefined>()
 
     return (
@@ -24,9 +24,9 @@ export const Home: FC = () => {
                 </Group>
                 <Suspense fallback={<Skeleton h={440} w={740} ml={60} mb={5} />}>
                     <KeystoneFrequencyChart
-                        period={activePeriod ? Number.parseInt(activePeriod) : undefined}
+                        period={Number.parseInt(activePeriod)}
                         dungeon={activeDungeon ? Number.parseInt(activeDungeon) : undefined}
-                        key={`KeystoneFrequencyChart${'Period' + activePeriod}${'Dungeon' + activeDungeon}`}
+                        key={`KeystoneFrequencyChartPeriod${activePeriod}${'Dungeon' + activeDungeon}`}
                     />
                 </Suspense>
             </Card>

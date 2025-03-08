@@ -1,10 +1,20 @@
 import { getConnectedRealmIDs } from './connectedRealmService'
 import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
-import { insertCharacters, insertRuns } from './insertService'
-import { dpsIDs, healerIDs, tankIDs, getDungeonMapByPeriod, getDungeonIDsByPeriod } from '../types/kli/map'
+import { insertCharacters, insertRuns, insertKeystoneFrequency } from './insertService'
+import {
+    dpsIDs,
+    healerIDs,
+    tankIDs,
+    getDungeonMapByPeriod,
+    getDungeonIDsByPeriod,
+    specIds,
+    SpecId,
+    specDBNames,
+} from '../types/kli/map'
 import { LeadingGroup, Member } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
+import { DBKeystoneFrequency } from '../models/keystoneFrequency'
 
 export const updateAllExpansionsRuns = async () => {
     // run from the start of the season (period 977) to the current period
@@ -99,8 +109,11 @@ async function saveLeaderboardData(
     uniqueCharacters: Member[]
 ) {
     console.time(`Inserting data`)
-    await prepareRunsInsert(uniqueRuns, dungeon, period)
-    await prepCharacterInsert(uniqueCharacters)
+    if (period === 0) {
+        await prepareRunsInsert(uniqueRuns, dungeon, period)
+        await prepCharacterInsert(uniqueCharacters)
+    }
+    await prepKeystoneFrequencyInsert(uniqueRuns, dungeon, period)
     console.timeEnd(`Inserting data`)
     return Promise.resolve()
 }
@@ -144,4 +157,71 @@ async function prepareRunsInsert(uniqueRuns: LeadingGroup[], dungeonID: number, 
     })
 
     await insertRuns(runs)
+}
+
+async function prepKeystoneFrequencyInsert(uniqueRuns: LeadingGroup[], dungeon: number, period: number) {
+    console.time('Inserting keystone frequency')
+    const keystoneFrequencies = new Map<string, DBKeystoneFrequency>()
+    uniqueRuns.forEach((run) => {
+        const key = `${run.keystone_level}`
+        if (!keystoneFrequencies.has(key)) {
+            keystoneFrequencies.set(`${run.keystone_level}`, {
+                keystone_level: run.keystone_level,
+                period: period,
+                dungeon: dungeon,
+                arcane: 0,
+                fire: 0,
+                frost_mage: 0,
+                holy_paladin: 0,
+                protection_paladin: 0,
+                retribution: 0,
+                arms: 0,
+                fury: 0,
+                protection_warrior: 0,
+                balance: 0,
+                feral: 0,
+                guardian: 0,
+                restoration_druid: 0,
+                blood: 0,
+                frost_death_knight: 0,
+                unholy: 0,
+                beast_mastery: 0,
+                marksmanship: 0,
+                survival: 0,
+                discipline: 0,
+                holy_priest: 0,
+                shadow: 0,
+                assassination: 0,
+                outlaw: 0,
+                subtlety: 0,
+                elemental: 0,
+                enhancement: 0,
+                restoration_shaman: 0,
+                affliction: 0,
+                demonology: 0,
+                destruction: 0,
+                brewmaster: 0,
+                windwalker: 0,
+                mistweaver: 0,
+                havoc: 0,
+                vengeance: 0,
+                devastation: 0,
+                preservation: 0,
+                augmentation: 0,
+                total_runs: 0,
+            })
+        }
+        const kf = keystoneFrequencies.get(`${run.keystone_level}`)
+        if (kf) {
+            run.members.forEach((member) => {
+                kf[specDBNames[specIds.indexOf(member.specialization.id as SpecId)]]++
+            })
+            kf.total_runs++
+        } else {
+            console.error(`Failed to get keystone frequency for keystone level ${run.keystone_level}`)
+        }
+    })
+
+    await insertKeystoneFrequency(Array.from(keystoneFrequencies.values()))
+    console.timeEnd('Inserting keystone frequency')
 }

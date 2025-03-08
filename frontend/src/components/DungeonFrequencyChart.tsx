@@ -3,7 +3,7 @@ import { dungeonSeries } from '../utils/series.ts'
 import { BarChart } from '@mantine/charts'
 import { useGetDungeonFrequency } from '../hooks/useGetDungeonFrequency.tsx'
 
-const DungeonFrequencyChart: FC<{ period?: number }> = ({ period }) => {
+const DungeonFrequencyChart: FC<{ period: number }> = ({ period }) => {
     const { data } = useGetDungeonFrequency(period)
 
     const chartData = useMemo(
@@ -31,7 +31,6 @@ const DungeonFrequencyChart: FC<{ period?: number }> = ({ period }) => {
             series={[{ name: 'runs', label: 'Total Runs', color: 'violet' }]}
             withBarValueLabel={true}
             withTooltip={false}
-            // withYAxis={false}
         />
     )
 }

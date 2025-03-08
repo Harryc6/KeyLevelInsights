@@ -1,4 +1,4 @@
-import { SpecId, specNames } from './map'
+import { specNames } from './map'
 
 export type KeystoneLevelFrequency = {
     keystoneLevel: number
@@ -7,24 +7,6 @@ export type KeystoneLevelFrequency = {
 
 export type DungeonFrequency = {
     dungeon: number
-    runs: number
-}
-
-// export type PeriodFrequencyReport = {
-//     byKeystoneLevel: KeystoneLevelFrequency[]
-//     byDungeon: DungeonFrequency[]
-//     totalRuns: number
-// }
-
-// export type FrequencyReport = {
-//     currentPeriod: PeriodFrequencyReport
-//     lastPeriod: PeriodFrequencyReport
-//     allPeriods: PeriodFrequencyReport
-// }
-
-export type SpecFrequency = {
-    keystone_level: number
-    spec_id: SpecId
     runs: number
 }
 

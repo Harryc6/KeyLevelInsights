@@ -8,7 +8,7 @@ const DungeonFrequencyChart = lazy(() => import('../components/DungeonFrequencyC
 
 export const Dungeons: FC = () => {
     const { data: periods } = useGetPeriods()
-    const [activePeriod, setActivePeriod] = useState<string | undefined>(periods[0].toString())
+    const [activePeriod, setActivePeriod] = useState<string>(periods[0].toString())
 
     return (
         <Stack>
@@ -19,7 +19,7 @@ export const Dungeons: FC = () => {
                 </Group>
                 <Suspense fallback={<Skeleton h={470} w={740} mb={30} ml={60} />}>
                     <DungeonFrequencyChart
-                        period={activePeriod ? Number.parseInt(activePeriod) : undefined}
+                        period={Number.parseInt(activePeriod)}
                         key={`DungeonFrequency${activePeriod}`}
                     />
                 </Suspense>

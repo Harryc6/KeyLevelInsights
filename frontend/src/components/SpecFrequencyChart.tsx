@@ -8,11 +8,7 @@ import { lightShade } from '../utils/constants.ts'
 
 export type DisplayType = 'Spec' | 'DPS' | 'Healer' | 'Tank'
 
-const SpecFrequencyChart: FC<{ type: DisplayType; period?: number; dungeon?: number }> = ({
-    type,
-    period,
-    dungeon,
-}) => {
+const SpecFrequencyChart: FC<{ type: DisplayType; period: number; dungeon?: number }> = ({ type, period, dungeon }) => {
     const { data } = useGetSpecFrequency(period, dungeon)
     const series =
         type === 'Spec'

@@ -8,11 +8,11 @@ import {
 
 const router = Router()
 
-router.get('/keystone-frequency', fetchKeystoneFrequency)
+router.get('/keystone-frequency/:period', fetchKeystoneFrequency)
 
-router.get('/spec-frequency', fetchSpecFrequency)
+router.get('/spec-frequency/:period', fetchSpecFrequency)
 
-router.get('/dungeon-frequency', fetchDungeonFrequency)
+router.get('/dungeon-frequency/:period', fetchDungeonFrequency)
 
 router.get('/periods', fetchPeriods)
 
