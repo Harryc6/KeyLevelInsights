@@ -66,7 +66,7 @@ export const ChartTooltip: FC<{ props: TooltipProps<string, string>; series: Cha
                     padding: 'var(--mantine-spacing-xs) var(--mantine-spacing-md)',
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 390,
+                    maxHeight: 360,
                     flexWrap: 'wrap',
                     columnGap: 'var(--mantine-spacing-md)',
                     rowGap: 'calc(var(--mantine-spacing-sm) / 2)',
