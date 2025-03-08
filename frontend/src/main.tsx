@@ -6,15 +6,14 @@ import { QueryClient } from '@tanstack/react-query'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Analytics } from "@vercel/analytics/react"
-
+import { Analytics } from '@vercel/analytics/react'
+import { darkShade, lightText } from './utils/constants.ts'
 
 // Import Mantine styles
 import '@mantine/core/styles.css'
 import '@mantine/charts/styles.css'
 // Import custom styles
 import './index.css'
-import { darkShade, lightText } from './utils/constants.ts'
 
 const theme = createTheme({
     fontFamily: `Gotham, ${DEFAULT_THEME.fontFamily}`,
@@ -156,7 +155,7 @@ createRoot(document.getElementById('root')!).render(
             <MantineProvider theme={theme} forceColorScheme={'light'} cssVariablesResolver={resolver}>
                 <ErrorBoundary fallback={<p>Something went wrong</p>}>
                     <App />
-                    <Analytics/>
+                    <Analytics />
                 </ErrorBoundary>
             </MantineProvider>
         </PersistQueryClientProvider>

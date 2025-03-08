@@ -1,4 +1,4 @@
-import { AppShell as MantineAppShell, Burger, Card, Group, Stack, Title } from '@mantine/core'
+import { AppShell as MantineAppShell, Burger, Card, Container, Group, Stack, Title } from '@mantine/core'
 import { useDisclosure, useHeadroom } from '@mantine/hooks'
 import { FC, Suspense } from 'react'
 import { Outlet, useNavigate } from 'react-router'
@@ -9,10 +9,11 @@ import { darkAccent, lightShade, lightText } from '../utils/constants.ts'
 const AppShell: FC = () => {
     const [opened, { toggle }] = useDisclosure()
     const navigate = useNavigate()
-    const pinned = useHeadroom({ fixedAt: 120 })
+    const pinned = useHeadroom({ fixedAt: 60 })
 
     return (
         <MantineAppShell
+            style={{ display: 'flex', flexDirection: 'column', minHeight: '100vdh' }}
             header={{ height: 60, collapsed: !pinned }}
             navbar={{ width: 200, breakpoint: 'sm', collapsed: { desktop: true, mobile: !opened } }}
             padding={'sm'}
@@ -62,20 +63,19 @@ const AppShell: FC = () => {
             </MantineAppShell.Navbar>
 
             <MantineAppShell.Main>
-                <ErrorBoundary fallback={<Title>Something went wrong</Title>}>
-                    <Suspense fallback={<Title>Loading...</Title>}>{<Outlet />}</Suspense>
-                </ErrorBoundary>
+                <Stack justify={'space-between'} style={{ height: 'calc(100dvh - 84px)' }}>
+                    <ErrorBoundary fallback={<Title>Something went wrong</Title>}>
+                        <Suspense fallback={<Title>Loading...</Title>}>{<Outlet />}</Suspense>
+                    </ErrorBoundary>
+                    <Container mih={40} mt={10} maw={580}>
+                        <Title c={darkAccent} size={'xs'} ta={'center'}>
+                            © {new Date().getFullYear()} Key Level Insights - This site is still under development, and
+                            all data used for illustrations is currently based only on EU server information, which may
+                            result in inaccuracies.
+                        </Title>
+                    </Container>
+                </Stack>
             </MantineAppShell.Main>
-            <MantineAppShell.Footer withBorder={false}>
-                <Group justify={'center'} align={'center'} h={60}>
-                    <Title c={darkAccent} size={'xs'} ta={'center'}>
-                        © {new Date().getFullYear()} Key Level Insights - This site is still under development, and all
-                        data used for illustrations
-                        <br />
-                        is currently based only on EU server information, which may result in inaccuracies.
-                    </Title>
-                </Group>
-            </MantineAppShell.Footer>
         </MantineAppShell>
     )
 }
