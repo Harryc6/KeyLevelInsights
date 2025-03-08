@@ -10,7 +10,7 @@ const SpecFrequencyChart = lazy(() => import('../components/SpecFrequencyChart')
 export const Tanks: FC = () => {
     const { data: periods } = useGetPeriods()
     const [activePeriod, setActivePeriod] = useState<string>(periods[0].toString())
-    const [activeDungeon, setActiveDungeon] = useState<string | undefined>()
+    const [activeDungeon, setActiveDungeon] = useState<string>('')
 
     return (
         <Stack>

@@ -10,7 +10,7 @@ const KeystoneFrequencyChart = lazy(() => import('../components/KeystoneFrequenc
 export const Home: FC = () => {
     const { data: periods } = useGetPeriods()
     const [activePeriod, setActivePeriod] = useState<string>(periods[0].toString())
-    const [activeDungeon, setActiveDungeon] = useState<string | undefined>()
+    const [activeDungeon, setActiveDungeon] = useState<string>('')
 
     return (
         <Stack>
