@@ -20,40 +20,36 @@ const AppShell: FC = () => {
             <MantineAppShell.Header style={{ borderColor: darkAccent }}>
                 <Group h={'100%'} pl={15} pr={15}>
                     <Burger opened={opened} onClick={toggle} hiddenFrom={'sm'} size={'sm'} />
-                    <img
-                        src={'/favicon-256x256.webp'}
-                        alt={'Logo'}
-                        height={40}
-                        onClick={() => navigate('/')}
-                        style={{ cursor: 'pointer' }}
-                    />
-                    <Card
-                        bg={lightShade}
-                        h={40}
-                        p={0}
-                        pl={'md'}
-                        pr={'md'}
-                        pos={'fixed'}
-                        style={{ justifySelf: 'anchor-center' }}
-                        visibleFrom={'sm'}
-                    >
-                        <Group justify={'space-between'} h={'100%'} w={802}>
-                            <Title c={lightText}>Key Level Insights</Title>
-                            <Navbar toggle={toggle} compact />
-                        </Group>
-                    </Card>
-                    <Card
-                        bg={lightShade}
-                        h={40}
-                        p={0}
-                        pl={'md'}
-                        pr={'md'}
-                        pos={'fixed'}
-                        style={{ justifySelf: 'anchor-center' }}
-                        hiddenFrom={'sm'}
-                    >
-                        <Title c={lightText}>Key Level Insights</Title>
-                    </Card>
+                    <Group justify={'flex-start'} m={'auto'}>
+                        <Card bg={lightShade} h={40} p={0} pl={2} pr={'md'} w={834} visibleFrom={'sm'}>
+                            <Group h={'100%'} justify={'space-between'}>
+                                <Group gap={'xs'}>
+                                    <img
+                                        src={'/favicon-48x48.webp'}
+                                        alt={'Logo'}
+                                        height={38}
+                                        onClick={() => navigate('/')}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                    <Title c={lightText}>Key Level Insights</Title>
+                                </Group>
+                                <Navbar toggle={toggle} compact />
+                            </Group>
+                        </Card>
+                        <Card bg={lightShade} h={40} p={0} pl={2} pr={'md'} hiddenFrom={'sm'}>
+                            <Group gap={'xs'}>
+                                <img
+                                    src={'/favicon-48x48.webp'}
+                                    alt={'Logo'}
+                                    height={38}
+                                    width={38}
+                                    onClick={() => navigate('/')}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <Title c={lightText}>Key Level Insights</Title>
+                            </Group>
+                        </Card>
+                    </Group>
                 </Group>
             </MantineAppShell.Header>
 
@@ -70,6 +66,16 @@ const AppShell: FC = () => {
                     <Suspense fallback={<Title>Loading...</Title>}>{<Outlet />}</Suspense>
                 </ErrorBoundary>
             </MantineAppShell.Main>
+            <MantineAppShell.Footer withBorder={false}>
+                <Group justify={'center'} align={'center'} h={60}>
+                    <Title c={darkAccent} size={'xs'} ta={'center'}>
+                        © {new Date().getFullYear()} Key Level Insights - This site is still under development, and all
+                        data used for illustrations
+                        <br />
+                        is currently based only on EU server information, which may result in inaccuracies.
+                    </Title>
+                </Group>
+            </MantineAppShell.Footer>
         </MantineAppShell>
     )
 }
