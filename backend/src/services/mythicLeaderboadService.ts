@@ -1,4 +1,4 @@
-import { bNetPathBuilder, executeBNetQuery } from '../utils/bNetQuery'
+import { bNetPathBuilder, executeBNetQuery, Region } from '../utils/bNetQuery'
 import { MythicLeaderboard, MythicLeaderboardDetails } from '../types/bnet/mythicLeaderboard'
 
 export const getMythicLeaderboardIndex = async (connectedRealmId: number): Promise<MythicLeaderboard> => {
@@ -17,10 +17,15 @@ export const getMythicLeaderboardIndex = async (connectedRealmId: number): Promi
 export const getMythicLeaderboardByDungeonAndPeriod = async (
     connectedRealmId: number,
     dungeonId: number,
-    period: number
+    period: number,
+    region: Region = 'eu'
 ): Promise<MythicLeaderboardDetails> => {
     return executeBNetQuery<MythicLeaderboardDetails>(
-        bNetPathBuilder(`/connected-realm/${connectedRealmId}/mythic-leaderboard/${dungeonId}/period/${period}`)
+        bNetPathBuilder(
+            `/connected-realm/${connectedRealmId}/mythic-leaderboard/${dungeonId}/period/${period}`,
+            undefined,
+            region
+        )
     )
         .then((data) => {
             return data

@@ -144,10 +144,6 @@ export const getValidBNetAccessToken = async (): Promise<string> => {
                         console.info('****************************************************************')
                     })
             }
-        } else {
-            console.info('****************************************************************')
-            console.info('Waiting for token to be fetched...')
-            console.info('****************************************************************')
         }
         return tokenPromise!
     }

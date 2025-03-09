@@ -1,4 +1,4 @@
-import { getConnectedRealmIDs } from './connectedRealmService'
+import { getAllConnectedRealmIDs } from './connectedRealmService'
 import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
 import { insertCharacters, insertRuns, insertKeystoneFrequency } from './insertService'
@@ -15,6 +15,7 @@ import {
 import { LeadingGroup, Member } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
 import { DBKeystoneFrequency } from '../models/keystoneFrequency'
+import { RegionConnectedRealms } from '../models/connectedRealm'
 
 export const updateAllExpansionsRuns = async () => {
     // run from the start of the season (period 977) to the current period
@@ -26,23 +27,27 @@ export const updateAllExpansionsRuns = async () => {
 }
 
 export const collectAndStoreRuns = async (period?: number) => {
-    const [connectedRealmIDs, currentPeriod] = await Promise.all([getConnectedRealmIDs(), getCurrentPeriod()])
+    const [regionConnectedRealms, currentPeriod] = await Promise.all([getAllConnectedRealmIDs(), getCurrentPeriod()])
     console.time(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
     const dungeonIDsList = getDungeonIDsByPeriod(period ?? currentPeriod)
 
     for (const dungeonID of dungeonIDsList) {
-        await collectAndStoreRunsByDungeon(dungeonID, connectedRealmIDs, period ?? currentPeriod)
+        await collectAndStoreRunsByDungeon(dungeonID, regionConnectedRealms, period ?? currentPeriod)
     }
     console.timeEnd(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
     console.log('****************************************************************')
     return Promise.resolve()
 }
 
-async function collectAndStoreRunsByDungeon(dungeon: number, connectedRealmIDs: number[], period: number) {
+async function collectAndStoreRunsByDungeon(
+    dungeon: number,
+    regionConnectedRealms: RegionConnectedRealms[],
+    period: number
+) {
     const dungeonMap = getDungeonMapByPeriod(period)
     console.log(`Collecting leaderboards for ${dungeonMap.get(dungeon)} for period ${period}`)
     console.time(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
-    const leaderboards: LeadingGroup[] = await fetchLeaderboards(connectedRealmIDs, dungeon, period)
+    const leaderboards: LeadingGroup[] = await fetchLeaderboards(regionConnectedRealms, dungeon, period)
     const uniqueRuns = getUniqueRuns(leaderboards)
     const uniqueCharacters = getUniqueCharacters(uniqueRuns)
     await saveLeaderboardData(uniqueRuns, dungeon, period, uniqueCharacters)
@@ -51,26 +56,45 @@ async function collectAndStoreRunsByDungeon(dungeon: number, connectedRealmIDs: 
     return Promise.resolve()
 }
 
-const fetchLeaderboards = async (connectedRealmIDs: number[], dungeonID: number, currentPeriod: number) => {
+const fetchLeaderboards = async (
+    regionConnectedRealms: RegionConnectedRealms[],
+    dungeonID: number,
+    currentPeriod: number
+) => {
     console.time(`Fetched leaderboards in`)
-    let completed = 0
-    process.stdout.write(`Fetching leaderboards: ${completed} / ${connectedRealmIDs.length}`)
-    const results = await Promise.all(
-        connectedRealmIDs.map(async (id) => {
-            const results = await getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod)
-            if (completed + 1 === connectedRealmIDs.length) process.stdout.write('\r\x1b[K')
-            else process.stdout.write(`\rFetching leaderboards: ${++completed} / ${connectedRealmIDs.length}`)
-            return results
-        })
-    )
-        .then((results) => results.flatMap((board) => board.leading_groups))
-        .catch((error) => {
-            console.error('Error fetching leaderboards:', error)
-            throw error
-        })
-    console.log(`Fetched leaderboards containing ${results.length} runs`)
+    const allResults: LeadingGroup[] = []
+
+    for (const rcr of regionConnectedRealms) {
+        let completed = 0
+        console.time(`Fetched leaderboards for region ${rcr.region}`)
+        process.stdout.write(`Fetched leaderboards for region ${rcr.region}: ${completed} / ${rcr.realms.length}`)
+        await Promise.all(
+            rcr.realms.map(async (id) => {
+                const results = await getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod, rcr.region)
+                completed++
+                process.stdout.write(
+                    `\rFetched leaderboards for region ${rcr.region}: ${completed} / ${rcr.realms.length}`
+                )
+                return results
+            })
+        )
+            .then((results) => {
+                const flatResults = results.flatMap((board) => board.leading_groups)
+                console.log(`\r\x1b[KFetched ${flatResults.length} runs for region ${rcr.region}`)
+                allResults.push(...flatResults)
+            })
+            .catch((error) => {
+                console.error(`\r\x1b[KError fetching leaderboards for region ${rcr.region}:`, error)
+                throw error
+            })
+            .finally(() => {
+                console.timeEnd(`Fetched leaderboards for region ${rcr.region}`)
+            })
+    }
+
+    console.log(`Fetched leaderboards containing ${allResults.length} runs`)
     console.timeEnd(`Fetched leaderboards in`)
-    return results
+    return allResults
 }
 
 const getUniqueRuns = (runs: LeadingGroup[]) => {
@@ -109,7 +133,8 @@ async function saveLeaderboardData(
     uniqueCharacters: Member[]
 ) {
     console.time(`Inserting data`)
-    if (period === 0) {
+    // If development environment, insert all characters and runs
+    if (process.env.ENVIROMENT === 'development') {
         await prepareRunsInsert(uniqueRuns, dungeon, period)
         await prepCharacterInsert(uniqueCharacters)
     }

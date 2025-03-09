@@ -1,6 +1,7 @@
-import { bNetPathBuilder, executeBNetQuery } from '../utils/bNetQuery'
+import { bNetPathBuilder, executeBNetQuery, Region } from '../utils/bNetQuery'
 import { ConnectedRealm, ConnectedRealmsList, PaginatedConnectedRealms } from '../types/bnet/connectedRealm'
 import { getLocalisedString } from '../utils/localisationUtils'
+import { RegionConnectedRealms } from '../models/connectedRealm'
 
 export const getConnectRealmsIndex = async (): Promise<ConnectedRealmsList> => {
     return executeBNetQuery<ConnectedRealmsList>(bNetPathBuilder(`/connected-realm/index`))
@@ -41,9 +42,9 @@ export const getConnectedRealmNames = async (): Promise<string[]> => {
         })
 }
 
-export const getConnectedRealmIDs = async (): Promise<number[]> => {
+export const getConnectedRealmIDs = async (region: Region = 'eu'): Promise<number[]> => {
     return executeBNetQuery<PaginatedConnectedRealms>(
-        bNetPathBuilder(`/search/connected-realm`, new URLSearchParams({ orderby: 'id' }))
+        bNetPathBuilder(`/search/connected-realm`, new URLSearchParams({ orderby: 'id' }), region)
     )
         .then((paginatedConnectedRealms) => {
             return paginatedConnectedRealms?.results
@@ -54,4 +55,14 @@ export const getConnectedRealmIDs = async (): Promise<number[]> => {
             console.error('Error fetching connected realm IDs:', error)
             throw error
         })
+}
+
+export const getAllConnectedRealmIDs = async (): Promise<RegionConnectedRealms[]> => {
+    const regions: Region[] = ['eu', 'us', 'kr', 'tw']
+    const connectedRealms: { region: Region; realms: number[] }[] = []
+    for (const region of regions) {
+        const realmIDs = await getConnectedRealmIDs(region)
+        connectedRealms.push({ region, realms: realmIDs })
+    }
+    return connectedRealms
 }

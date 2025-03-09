@@ -3,10 +3,23 @@ import axios, { isAxiosError } from 'axios'
 import { BNetPath } from '../types/bnet/link'
 import Bottleneck from 'bottleneck'
 
-type NamespaceCategory = 'static' | 'dynamic' | 'profile'
-type Region = 'us' | 'eu' | 'kr' | 'tw' | 'cn'
-type Namespace = `${NamespaceCategory}-${Region}`
-type Locale = 'en_GB' | 'es_ES' | 'fr_FR' | 'ru_RU' | 'de_DE' | 'pt_PT' | 'it_IT'
+export type NamespaceCategory = 'static' | 'dynamic' | 'profile'
+export const regions = ['us', 'eu', 'kr', 'tw', 'cn'] as const
+export type Region = (typeof regions)[number]
+export type Namespace = `${NamespaceCategory}-${Region}`
+export type Locale =
+    | 'en_US' // English (US)
+    | 'es_MX' // Spanish (Mexico)
+    | 'pt_BR' // Portuguese (Brazil)
+    | 'de_DE' // German
+    | 'en_GB' // English (UK)
+    | 'es_ES' // Spanish (Spain)
+    | 'fr_FR' // French
+    | 'it_IT' // Italian
+    | 'ru_RU' // Russian
+    | 'ko_KR' // Korean
+    | 'zh_TW' // Traditional Chinese
+    | 'zh_CN' // Simplified Chinese
 
 // Create a Bottleneck limiter
 const limiter = new Bottleneck({
