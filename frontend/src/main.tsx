@@ -7,6 +7,7 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { darkShade, lightText } from './utils/constants.ts'
 
 // Import Mantine styles
@@ -156,6 +157,7 @@ createRoot(document.getElementById('root')!).render(
                 <ErrorBoundary fallback={<p>Something went wrong</p>}>
                     <App />
                     <Analytics />
+                    <SpeedInsights />
                 </ErrorBoundary>
             </MantineProvider>
         </PersistQueryClientProvider>
