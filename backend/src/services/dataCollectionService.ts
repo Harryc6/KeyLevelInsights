@@ -134,7 +134,7 @@ async function saveLeaderboardData(
 ) {
     console.time(`Inserting data`)
     // If development environment, insert all characters and runs
-    if (process.env.ENVIROMENT === 'development') {
+    if (process.env.ENVIRONMENT === 'development') {
         await prepareRunsInsert(uniqueRuns, dungeon, period)
         await prepCharacterInsert(uniqueCharacters)
     }

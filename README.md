@@ -60,7 +60,7 @@ npm run start-backend
 The backend expects environment variables for database connection and API access. Variables include:
 
 - `PORT` – Port for the Express server (defaults to `5000` if not set).
-- `ENVIROMENT` – Application environment flag used by the data collection service; when set to `development`, additional character and run data is inserted.
+- `ENVIRONMENT` – Application environment flag used by the data collection service; when set to `development`, additional character and run data is inserted.
 - `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_SSL` – PostgreSQL connection details. `DB_SSL` should be set to `'true'` to enable SSL.
 - `BNET_CLIENT_ID` / `BNET_CLIENT_SECRET` – Blizzard (Battle.net) API credentials.
 - `WCL_CLIENT_ID` / `WCL_CLIENT_SECRET` – Warcraft Logs API credentials.
