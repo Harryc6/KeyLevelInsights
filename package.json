@@ -32,6 +32,6 @@
   "author": "Harry Carr",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.13.0"
+    "@types/node": "^24.10.2"
   }
 }
