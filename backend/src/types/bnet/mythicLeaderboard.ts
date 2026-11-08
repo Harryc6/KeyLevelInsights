@@ -68,6 +68,7 @@ type KeystoneAffix = {
         id: number
     }
     starting_level: number
+    max_level: number | undefined
 }
 
 type Map = {

@@ -1,17 +1,32 @@
-import { Series, ttwS1DungeonSeries, ttwS2DungeonSeries } from './series.ts'
+import type { SeasonMetadata } from '../hooks/useGetMetadata.ts'
 
-export const DungeonSeriesByPeriod = (period: string | undefined): Series[] => {
-    if (!period) {
-        return ttwS1DungeonSeries
-    }
+export const getSeasonByPeriod = (period: number, seasons: SeasonMetadata[]): SeasonMetadata | undefined =>
+    seasons.find(
+        ({ firstPeriod, lastPeriod }) => period >= firstPeriod && (lastPeriod === null || period <= lastPeriod)
+    )
 
-    const activePeriod = Number.parseInt(period)
-    if (activePeriod >= 976 && activePeriod <= 1000) {
-        // If period is greater or equal to 976 and 1000 or less, return twwS1DungeonSeries
-        return ttwS1DungeonSeries
-    } else if (activePeriod >= 1001 && activePeriod <= 1025) {
-        return ttwS2DungeonSeries
-    } else {
-        return []
-    }
+export function formatNumber(num: number, decimals: number = 0): string {
+    // Handle edge cases
+    if (num === 0) return '0'
+    if (isNaN(num) || !isFinite(num)) return 'Invalid'
+
+    const isNegative = num < 0
+    const absNum = Math.abs(num)
+
+    // Define thresholds and suffixes
+    const suffixes = [
+        { threshold: 1e9, suffix: 'B' }, // Billions
+        { threshold: 1e6, suffix: 'M' }, // Millions
+        { threshold: 1e3, suffix: 'K' }, // Thousands
+        { threshold: 1, suffix: '' }, // Base
+    ]
+
+    // Find appropriate suffix
+    const { threshold, suffix } = suffixes.find((s) => absNum >= s.threshold)!
+
+    // Scale and format
+    const scaled = absNum / threshold
+    const formatted = scaled.toFixed(decimals)
+
+    return `${isNegative ? '-' : ''}${formatted}${suffix}`
 }

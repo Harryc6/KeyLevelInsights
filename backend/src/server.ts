@@ -5,7 +5,7 @@ import rateLimitRoutes from './routes/rateLimitRoutes'
 import connectedRealmRoutes from './routes/connectedRealmRoutes'
 import mythicKeystoneRoutes from './routes/mythicKeystoneRoutes'
 import mythicLeaderboardRoutes from './routes/mythicLeaderboardRoutes'
-import { collectAndStoreRuns } from './services/dataCollectionService'
+import { collectAndStoreRuns, updateAllExpansionsRuns } from './services/dataCollectionService'
 import cron from 'node-cron'
 import keystoneFrequencyRoutes from './routes/keystoneFrequencyRoutes'
 import { getCurrentPeriod } from './services/mythicKeystoneService'
@@ -50,7 +50,12 @@ cron.schedule('0 9 * * 3', () => {
 })
 
 // collectAndStoreRuns()
-// updateAllExpansionsRuns()
+// updateAllExpansionsRuns().catch((error) => {
+//     console.error(
+//         'Historical backfill stopped; earlier completed dungeon-periods remain stored. API stays online.',
+//         error
+//     )
+// })
 
 // Start the server and listen on the specified port
 const PORT = parseInt(process.env.PORT || '5000')

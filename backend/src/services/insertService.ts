@@ -78,16 +78,16 @@ async function insertCharacterBatch(batch: Character[]) {
 export const insertKeystoneFrequency = async (keystoneFrequencies: DBKeystoneFrequency[]): Promise<void> => {
     const query = `
         INSERT INTO keystone_frequency (
-            keystone_level, arcane, fire, frost_mage, holy_paladin, protection_paladin, retribution, arms, fury, protection_warrior, balance, feral, guardian, restoration_druid, blood, frost_death_knight, unholy, beast_mastery, marksmanship, survival, discipline, holy_priest, shadow, assassination, outlaw, subtlety, elemental, enhancement, restoration_shaman, affliction, demonology, destruction, brewmaster, windwalker, mistweaver, havoc, vengeance, devastation, preservation, augmentation, period, dungeon, total_runs
+            keystone_level, arcane, fire, frost_mage, holy_paladin, protection_paladin, retribution, arms, fury, protection_warrior, balance, feral, guardian, restoration_druid, blood, frost_death_knight, unholy, beast_mastery, marksmanship, survival, discipline, holy_priest, shadow, assassination, outlaw, subtlety, elemental, enhancement, restoration_shaman, affliction, demonology, destruction, brewmaster, windwalker, mistweaver, havoc, vengeance, devastation, preservation, augmentation, devourer, period, dungeon, total_runs
         ) VALUES ${keystoneFrequencies
             .map((_, i) => {
-                const offset = i * 43
+                const offset = i * 44
                 return `(
                         $${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9}, $${offset + 10},
                         $${offset + 11}, $${offset + 12}, $${offset + 13}, $${offset + 14}, $${offset + 15}, $${offset + 16}, $${offset + 17}, $${offset + 18}, $${offset + 19}, $${offset + 20},
                         $${offset + 21}, $${offset + 22}, $${offset + 23}, $${offset + 24}, $${offset + 25}, $${offset + 26}, $${offset + 27}, $${offset + 28}, $${offset + 29}, $${offset + 30},
                         $${offset + 31}, $${offset + 32}, $${offset + 33}, $${offset + 34}, $${offset + 35}, $${offset + 36}, $${offset + 37}, $${offset + 38}, $${offset + 39}, $${offset + 40},
-                        $${offset + 41}, $${offset + 42}, $${offset + 43}
+                        $${offset + 41}, $${offset + 42}, $${offset + 43}, $${offset + 44}
                     )`
             })
             .join(', ')}
@@ -131,6 +131,7 @@ export const insertKeystoneFrequency = async (keystoneFrequencies: DBKeystoneFre
             devastation = EXCLUDED.devastation,
             preservation = EXCLUDED.preservation,
             augmentation = EXCLUDED.augmentation,
+            devourer = EXCLUDED.devourer,
             total_runs = EXCLUDED.total_runs;
     `
 
@@ -175,6 +176,7 @@ export const insertKeystoneFrequency = async (keystoneFrequencies: DBKeystoneFre
         kf.devastation,
         kf.preservation,
         kf.augmentation,
+        kf.devourer,
         kf.period,
         kf.dungeon,
         kf.total_runs,

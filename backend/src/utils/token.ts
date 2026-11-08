@@ -71,7 +71,7 @@ const saveAccessTokenToEnv = (token: string, expiresIn: number, suffix: 'WCL' | 
     const expiryTime = Date.now() + expiresIn * 1000 // Convert seconds to milliseconds
 
     console.log('Saving access token to .env file...')
-    console.log('Token:', token)
+    console.log('Token:', token.replace(/./g, '*'))
     console.log('Expires in:', expiresIn)
 
     // Update the .env file with the new token and expiry time

@@ -6,5 +6,6 @@ export const useGetPeriods = (): UseSuspenseQueryResult<number[]> => {
     return useSuspenseQuery<number[]>({
         queryKey: ['Periods'],
         queryFn: () => useFetchData<number[]>(path),
+        select: (periods) => [...periods].sort((a, b) => b - a),
     })
 }

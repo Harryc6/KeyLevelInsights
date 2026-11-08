@@ -2,6 +2,8 @@ import { bNetPathBuilder, executeBNetQuery } from '../utils/bNetQuery'
 import { MythicKeystoneSeasons } from '../types/bnet/mythicKeystoneSeason'
 import { MythicKeystonePeriods } from '../types/bnet/mythicKeystonePeriod'
 import { MythicKeystoneDungeons } from '../types/bnet/mythicKeystoneDungeon'
+import { SeasonId } from '../types/kli/map'
+import { run } from 'node:test'
 
 export const getMythicKeystoneDungeonsIndex = async (): Promise<MythicKeystoneDungeons> => {
     return executeBNetQuery<MythicKeystoneDungeons>(bNetPathBuilder(`/mythic-keystone/dungeon/index`))

@@ -1,59 +1,108 @@
 import { getAllConnectedRealmIDs } from './connectedRealmService'
 import { getCurrentPeriod } from './mythicKeystoneService'
 import { getMythicLeaderboardByDungeonAndPeriod } from './mythicLeaderboadService'
-import { insertCharacters, insertRuns, insertKeystoneFrequency } from './insertService'
+import { insertCharacters, insertKeystoneFrequency, insertRuns } from './insertService'
 import {
     dpsIDs,
+    Dungeon,
+    DungeonId,
+    getDungeonsByPeriod,
     healerIDs,
-    tankIDs,
-    getDungeonMapByPeriod,
-    getDungeonIDsByPeriod,
-    specIds,
-    SpecId,
     specDBNames,
+    SpecId,
+    specIds,
+    tankIDs,
 } from '../types/kli/map'
 import { LeadingGroup, Member } from '../types/bnet/mythicLeaderboard'
 import { Run } from '../types/kli/run'
 import { DBKeystoneFrequency } from '../models/keystoneFrequency'
 import { RegionConnectedRealms } from '../models/connectedRealm'
+import { BNetRequestError, Region } from '../utils/bNetQuery'
+
+type UnavailableLeaderboard = {
+    region: Region
+    dungeon: number
+    period: number
+    realmCount: number
+    exampleUrl: string
+}
+
+class UnavailableLeaderboardError extends Error {
+    constructor(readonly details: UnavailableLeaderboard) {
+        super(
+            `Blizzard returned HTTP 404 for all ${details.realmCount} realms in region ${details.region}, ` +
+            `dungeon ${details.dungeon}, period ${details.period}. Example: ${details.exampleUrl}`
+        )
+        this.name = 'UnavailableLeaderboardError'
+    }
+}
 
 export const updateAllExpansionsRuns = async () => {
     // run from the start of the season (period 977) to the current period
     const currentPeriod = await getCurrentPeriod()
     const periods = Array.from({ length: currentPeriod - 977 }, (_, i) => currentPeriod - i)
+    const unavailable: UnavailableLeaderboard[] = []
     for (const period of periods) {
-        await collectAndStoreRuns(period)
+        unavailable.push(...(await collectAndStoreRuns(period)))
     }
+    if (unavailable.length > 0) {
+        console.warn(
+            `Historical backfill finished with ${unavailable.length} unavailable dungeon-periods. ` +
+            'These gaps were not saved as zero runs; see the skipped-history warnings for retry targets.'
+        )
+    } else {
+        console.log('Historical backfill finished without unavailable dungeon-periods')
+    }
+    return unavailable
 }
 
 export const collectAndStoreRuns = async (period?: number) => {
     const [regionConnectedRealms, currentPeriod] = await Promise.all([getAllConnectedRealmIDs(), getCurrentPeriod()])
-    console.time(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
-    const dungeonIDsList = getDungeonIDsByPeriod(period ?? currentPeriod)
-
-    for (const dungeonID of dungeonIDsList) {
-        await collectAndStoreRunsByDungeon(dungeonID, regionConnectedRealms, period ?? currentPeriod)
+    const targetPeriod = period ?? currentPeriod
+    const unavailable: UnavailableLeaderboard[] = []
+    const timer = `Collection & storage of all dungeon runs for period ${targetPeriod}`
+    console.time(timer)
+    try {
+        const dungeonsList: Dungeon[] = getDungeonsByPeriod(targetPeriod)
+        for (const dungeon of dungeonsList) {
+            try {
+                await collectAndStoreRunsByDungeon(dungeon, regionConnectedRealms, targetPeriod)
+            } catch (error) {
+                if (!(error instanceof UnavailableLeaderboardError) || targetPeriod >= currentPeriod) throw error
+                unavailable.push(error.details)
+                console.warn(
+                    `Skipping unavailable historical dungeon-period: ${error.message}. ` +
+                    `No data saved or cleared for this dungeon-period. Check the mapping/provider availability, ` +
+                    `then retry collectAndStoreRuns(${targetPeriod}).`
+                )
+            }
+        }
+    } finally {
+        console.timeEnd(timer)
     }
-    console.timeEnd(`Collection & storage of all dungeon runs for period ${period ?? currentPeriod}`)
-    console.log('****************************************************************')
-    return Promise.resolve()
+    return unavailable
 }
 
 async function collectAndStoreRunsByDungeon(
-    dungeon: number,
+    dungeon: Dungeon,
     regionConnectedRealms: RegionConnectedRealms[],
     period: number
 ) {
-    const dungeonMap = getDungeonMapByPeriod(period)
-    console.log(`Collecting leaderboards for ${dungeonMap.get(dungeon)} for period ${period}`)
-    console.time(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
-    const leaderboards: LeadingGroup[] = await fetchLeaderboards(regionConnectedRealms, dungeon, period)
-    const uniqueRuns = getUniqueRuns(leaderboards)
-    const uniqueCharacters = getUniqueCharacters(uniqueRuns)
-    await saveLeaderboardData(uniqueRuns, dungeon, period, uniqueCharacters)
-    console.timeEnd(`Collection & storage of ${dungeonMap.get(dungeon)} runs for period ${period}`)
-    console.log('****************************************************************')
-    return Promise.resolve()
+    console.log(`Collecting leaderboards for ${dungeon.name} for period ${period}`)
+    const timer = `Collection & storage of ${dungeon.name} runs for period ${period}`
+    console.time(timer)
+    try {
+        const leaderboards = await fetchLeaderboards(regionConnectedRealms, dungeon.id, period)
+        const uniqueRuns = getUniqueRuns(leaderboards)
+        if (uniqueRuns.length === 0) {
+            console.log(`No eligible runs for dungeon ${dungeon.id}, period ${period}; leaving stored data unchanged`)
+            return
+        }
+        const uniqueCharacters = getUniqueCharacters(uniqueRuns)
+        await saveLeaderboardData(uniqueRuns, dungeon.id, period, uniqueCharacters)
+    } finally {
+        console.timeEnd(timer)
+    }
 }
 
 const fetchLeaderboards = async (
@@ -61,39 +110,59 @@ const fetchLeaderboards = async (
     dungeonID: number,
     currentPeriod: number
 ) => {
-    console.time(`Fetched leaderboards in`)
     const allResults: LeadingGroup[] = []
 
     for (const rcr of regionConnectedRealms) {
-        let completed = 0
-        console.time(`Fetched leaderboards for region ${rcr.region}`)
-        process.stdout.write(`Fetched leaderboards for region ${rcr.region}: ${completed} / ${rcr.realms.length}`)
-        await Promise.all(
-            rcr.realms.map(async (id) => {
-                const results = await getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod, rcr.region)
-                completed++
-                process.stdout.write(
-                    `\rFetched leaderboards for region ${rcr.region}: ${completed} / ${rcr.realms.length}`
+        const timer = `Fetched leaderboards for region ${rcr.region}, dungeon ${dungeonID}, period ${currentPeriod}`
+        console.time(timer)
+        try {
+            // Drain the batch before rejecting; never save partial regional aggregates.
+            const results = await Promise.allSettled(
+                rcr.realms.map((id) =>
+                    getMythicLeaderboardByDungeonAndPeriod(id, dungeonID, currentPeriod, rcr.region)
                 )
-                return results
-            })
-        )
-            .then((results) => {
-                const flatResults = results.flatMap((board) => board.leading_groups)
-                console.log(`\r\x1b[KFetched ${flatResults.length} runs for region ${rcr.region}`)
-                allResults.push(...flatResults)
-            })
-            .catch((error) => {
-                console.error(`\r\x1b[KError fetching leaderboards for region ${rcr.region}:`, error)
-                throw error
-            })
-            .finally(() => {
-                console.timeEnd(`Fetched leaderboards for region ${rcr.region}`)
-            })
+            )
+            const first = results[0]
+            if (
+                first?.status === 'rejected' &&
+                first.reason instanceof BNetRequestError &&
+                first.reason.status === 404 &&
+                results.every(
+                    (result) => result.status === 'rejected' &&
+                        result.reason instanceof BNetRequestError && result.reason.status === 404
+                )
+            ) {
+                throw new UnavailableLeaderboardError({
+                    region: rcr.region,
+                    dungeon: dungeonID,
+                    period: currentPeriod,
+                    realmCount: results.length,
+                    exampleUrl: first.reason.path,
+                })
+            }
+            const failures: string[] = []
+            for (const [index, result] of results.entries()) {
+                if (result.status === 'rejected') {
+                    const reason = result.reason instanceof Error ? result.reason.message : String(result.reason)
+                    failures.push(`realm ${rcr.realms[index]}: ${reason}`)
+                } else {
+                    for (const run of result.value.leading_groups) allResults.push(run)
+                }
+            }
+            if (failures.length > 0) {
+                throw new Error(
+                    `Incomplete collection for region ${rcr.region}, dungeon ${dungeonID}, period ${currentPeriod}: ` +
+                    `${failures.length}/${rcr.realms.length} realms failed. No data saved for this dungeon-period. ` +
+                    `Retry collectAndStoreRuns(${currentPeriod}) after resolving the API failure.\n${failures.join('\n')}`
+                )
+            }
+            console.log(`Fetched ${results.length}/${rcr.realms.length} leaderboards for region ${rcr.region}`)
+        } finally {
+            console.timeEnd(timer)
+        }
     }
 
     console.log(`Fetched leaderboards containing ${allResults.length} runs`)
-    console.timeEnd(`Fetched leaderboards in`)
     return allResults
 }
 
@@ -128,18 +197,18 @@ const getUniqueCharacters = (uniqueRuns: LeadingGroup[]) => {
 
 async function saveLeaderboardData(
     uniqueRuns: LeadingGroup[],
-    dungeon: number,
+    dungeon: DungeonId,
     period: number,
     uniqueCharacters: Member[]
 ) {
-    console.time(`Inserting data`)
+    console.time(`Inserting data for dungeon ${dungeon} during period ${period}`)
     // If development environment, insert all characters and runs
     if (process.env.ENVIRONMENT === 'development') {
         await prepareRunsInsert(uniqueRuns, dungeon, period)
         await prepCharacterInsert(uniqueCharacters)
     }
     await prepKeystoneFrequencyInsert(uniqueRuns, dungeon, period)
-    console.timeEnd(`Inserting data`)
+    console.timeEnd(`Inserting data for dungeon ${dungeon} during period ${period}`)
     return Promise.resolve()
 }
 
@@ -154,7 +223,7 @@ async function prepCharacterInsert(uniqueCharacters: Member[]) {
     await insertCharacters(characters)
 }
 
-async function prepareRunsInsert(uniqueRuns: LeadingGroup[], dungeonID: number, currentPeriod: number) {
+async function prepareRunsInsert(uniqueRuns: LeadingGroup[], dungeonID: DungeonId, currentPeriod: number) {
     const runs: Run[] = uniqueRuns.map((run) => {
         if (run.members.some((run) => run.specialization.id === undefined))
             console.error(
@@ -233,6 +302,7 @@ async function prepKeystoneFrequencyInsert(uniqueRuns: LeadingGroup[], dungeon: 
                 devastation: 0,
                 preservation: 0,
                 augmentation: 0,
+                devourer: 0,
                 total_runs: 0,
             })
         }

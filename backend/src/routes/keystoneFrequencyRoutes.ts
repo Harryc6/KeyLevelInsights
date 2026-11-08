@@ -5,6 +5,7 @@ import {
     fetchPeriods,
     fetchSpecFrequency,
 } from '../controllers/keystoneFrequencyController'
+import { fetchMetadata } from '../controllers/metadataController'
 
 const router = Router()
 
@@ -15,5 +16,7 @@ router.get('/spec-frequency/:period', fetchSpecFrequency)
 router.get('/dungeon-frequency/:period', fetchDungeonFrequency)
 
 router.get('/periods', fetchPeriods)
+
+router.get('/metadata', fetchMetadata)
 
 export default router

@@ -37,6 +37,7 @@ export type DBKeystoneFrequency = {
     windwalker: number
     mistweaver: number
     havoc: number
+    devourer: number
     vengeance: number
     devastation: number
     preservation: number

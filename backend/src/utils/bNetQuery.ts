@@ -2,6 +2,7 @@ import { getValidBNetAccessToken } from './token'
 import axios, { isAxiosError } from 'axios'
 import { BNetPath } from '../types/bnet/link'
 import Bottleneck from 'bottleneck'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 export type NamespaceCategory = 'static' | 'dynamic' | 'profile'
 export const regions = ['us', 'eu', 'kr', 'tw', 'cn'] as const
@@ -21,55 +22,85 @@ export type Locale =
     | 'zh_TW' // Traditional Chinese
     | 'zh_CN' // Simplified Chinese
 
-// Create a Bottleneck limiter
+export class BNetRequestError extends Error {
+    constructor(
+        message: string,
+        readonly status: number | undefined,
+        readonly path: BNetPath,
+        readonly attempts: number
+    ) {
+        super(message)
+        this.name = 'BNetRequestError'
+    }
+}
+
+// Shared by collection and HTTP callers, including retries.
 const limiter = new Bottleneck({
-    // reservoir: 36000, // Initial number of requests allowed
-    // reservoirRefreshAmount: 36000, // Number of requests to add to the reservoir every interval
-    // reservoirRefreshInterval: 1000 * 60 * 60, // Interval in milliseconds to add requests to the reservoir
-    minTime: 10, // Minimum time in milliseconds between each request
+    maxConcurrent: 4,
+    minTime: 100,
 })
+let rateLimitedUntil = 0
+
+const retryAfterMilliseconds = (value: unknown): number => {
+    if (typeof value !== 'string' && typeof value !== 'number') return 0
+    const seconds = Number(value)
+    if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000)
+    const date = Date.parse(String(value))
+    return Number.isFinite(date) ? Math.max(0, date - Date.now()) : 0
+}
 
 export const executeBNetQuery = async <T>(path: BNetPath): Promise<T> => {
-    let token = await getValidBNetAccessToken()
-    const retries: number = 3
-    let delay: number = 1000
+    const maxAttempts = 3
 
-    for (let attempt = 0; attempt < retries; attempt++) {
+    for (let attempt = 1; ; attempt++) {
         try {
             return await limiter.schedule<T>(async () => {
-                const response = await axios.get<T>(path, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                return response.data
+                // A 429 pauses queued requests too, not just the request that received it.
+                while (Date.now() < rateLimitedUntil) {
+                    await sleep(rateLimitedUntil - Date.now())
+                }
+                const token = await getValidBNetAccessToken()
+                try {
+                    const response = await axios.get<T>(path, {
+                        timeout: 30000,
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    return response.data
+                } catch (error) {
+                    if (isAxiosError(error) && error.response?.status === 429) {
+                        rateLimitedUntil = Math.max(
+                            rateLimitedUntil,
+                            Date.now() + Math.max(5000, retryAfterMilliseconds(error.response.headers['retry-after']))
+                        )
+                    }
+                    throw error
+                }
             })
         } catch (error) {
-            if (isAxiosError(error) && error.response?.status === 504 && attempt < retries - 1) {
-                console.warn(`Attempt ${attempt + 1} failed with 504, retrying in ${delay}ms...`)
-                await new Promise((resolve) => setTimeout(resolve, delay))
-                delay *= 2 // Exponential backoff
-                continue
-            } else if (isAxiosError(error) && error.response?.status === 429 && attempt < retries - 1) {
-                console.warn('Rate limited by the Blizzard API, retrying in 5 seconds...')
-                await new Promise((resolve) => setTimeout(resolve, 5000))
-                delay *= 2 // Exponential backoff
-                continue
-            } else if (isAxiosError(error) && error.response?.status === 401 && attempt < retries - 1) {
-                console.warn('Access token expired, refreshing token...')
-                token = await getValidBNetAccessToken()
-                continue
-            } else if (isAxiosError(error)) {
-                console.error(`Blizzard API request failed with status code ${error.response?.status}`, path)
-                throw new Error(`Blizzard API request failed with status code ${error.response?.status}`)
+            if (!isAxiosError(error)) throw error
+
+            const status = error.response?.status
+            const transient = status !== undefined
+                ? [429, 500, 502, 503, 504].includes(status)
+                : ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN', 'ERR_NETWORK'].includes(error.code ?? '')
+            const failure = `Blizzard API GET ${path} failed with ${status === undefined ? error.code ?? 'network error' : `HTTP ${status}`} (attempt ${attempt}/${maxAttempts})`
+
+            if (!transient || attempt === maxAttempts) {
+                // Do not expose Axios config/headers: they contain the access token.
+                throw new BNetRequestError(failure, status, path, attempt)
             }
-            console.error('Blizzard API request failed:', error)
-            throw new Error('Blizzard API request failed:' + error)
+
+            const delay = Math.max(
+                1000 * 2 ** (attempt - 1) + Math.floor(Math.random() * 250),
+                retryAfterMilliseconds(error.response?.headers['retry-after'])
+            )
+            console.warn(`${failure}; retrying in ${Math.max(delay, rateLimitedUntil - Date.now())}ms`)
+            await sleep(delay)
         }
     }
-    console.error(`Failed to fetch data from ${path} after ${retries} attempts`)
-    throw `Failed to fetch data from ${path} after ${retries} attempts`
 }
 
 export function bNetPathBuilder(

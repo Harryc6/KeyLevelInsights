@@ -1,34 +1,33 @@
-import { Dispatch, FC, SetStateAction, useMemo } from 'react'
+import type { FC } from 'react'
 import { Select } from '@mantine/core'
+import type { SeasonMetadata } from '../hooks/useGetMetadata.ts'
+import { getSeasonByPeriod } from '../utils/utils.ts'
 
-const PeriodSelect: FC<{ periods: number[]; setActivePeriod: Dispatch<SetStateAction<string>> }> = ({
-    periods,
-    setActivePeriod,
-}) => {
-    const getWeeksInPeriod = (period: number): string => {
-        // TTW S2 started on period 1001
-        if (period >= 1001) return `S2 Week ${period - 1000} - ${period}`
-        // TTW S1 started on period 977
-        if (period >= 977) return `S1 Week ${period - 976} - ${period}`
+const PeriodSelect: FC<{
+    periods: number[]
+    seasons: SeasonMetadata[]
+    value: number
+    onChange: (period: number) => void
+}> = ({ periods, seasons, value, onChange }) => {
+    const data = periods.map((period, index) => {
+        const season = getSeasonByPeriod(period, seasons)
+        const label = season
+            ? `${season.name} · Week ${period - season.firstPeriod + 1} · Period ${period}`
+            : `Period ${period}`
 
-        return period.toString()
-    }
-
-    const data = useMemo(
-        () => [
-            { value: periods[0].toString(), label: getWeeksInPeriod(periods[0]) + ' (Current)' },
-            ...periods.slice(1).map((value) => ({ value: value.toString(), label: getWeeksInPeriod(value) })),
-        ],
-        [periods]
-    )
+        return { value: String(period), label: label + (index === 0 ? ' (Latest available)' : '') }
+    })
 
     return (
         <Select
-            size={'xs'}
+            label="Period"
+            size="sm"
             data={data}
-            defaultValue={periods[0].toString()}
-            onChange={(value) => setActivePeriod(value ?? periods[0].toString())}
+            value={String(value)}
+            onChange={(period) => period !== null && onChange(Number(period))}
             allowDeselect={false}
+            searchable
+            styles={{ root: { flex: '1 1 360px', minWidth: 0, maxWidth: '100%' } }}
         />
     )
 }

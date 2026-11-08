@@ -43,7 +43,8 @@ export const getSpecFrequencyReport = async (period: number, dungeon?: number): 
                        cast(SUM(vengeance) as integer) AS vengeance,
                        cast(SUM(devastation) as integer) AS devastation,
                        cast(SUM(preservation) as integer) AS preservation,
-                       cast(SUM(augmentation) as integer) AS augmentation
+                       cast(SUM(augmentation) as integer) AS augmentation,
+                       cast(SUM(devourer) as integer) AS devourer
                    FROM keystone_frequency
                    WHERE period = $1
                    ${dungeon ? 'AND dungeon = $2' : ''}

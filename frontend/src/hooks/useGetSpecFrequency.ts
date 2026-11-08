@@ -42,6 +42,7 @@ export type SpecFrequencyReport = {
     devastation: number
     preservation: number
     augmentation: number
+    devourer: number
 }
 
 export const useGetSpecFrequency = (

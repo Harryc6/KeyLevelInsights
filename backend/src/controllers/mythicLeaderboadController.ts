@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { getMythicLeaderboardByDungeonAndPeriod, getMythicLeaderboardIndex } from '../services/mythicLeaderboadService'
 import { getCurrentPeriod } from '../services/mythicKeystoneService'
-import { getDungeonMapByPeriod } from '../types/kli/map'
+import { DungeonId, getDungeonById } from '../types/kli/map'
 
 export const fetchMythicLeaderboard = async (req: Request, res: Response): Promise<void> => {
     const connectedRealmId = parseInt(req.params.connectedRealmId)
@@ -22,10 +22,8 @@ export const fetchMythicLeaderboardByDungeonAndPeriod = async (req: Request, res
     const connectedRealmId = parseInt(req.params.connectedRealmId)
     const dungeonId = parseInt(req.params.dungeonId)
     const period = parseInt(req.params.period)
-    const dungeonMap = getDungeonMapByPeriod(period)
-    console.time(
-        `Fetching leaderboard for ${dungeonMap.get(dungeonId)} for period ${period} for connected realm ${connectedRealmId}`
-    )
+    const dungeonName = getDungeonById(dungeonId as DungeonId).name
+    console.time(`Fetching leaderboard for ${dungeonName} for period ${period} for connected realm ${connectedRealmId}`)
     return getMythicLeaderboardByDungeonAndPeriod(connectedRealmId, dungeonId, period)
         .then((connectedRealms) => {
             res.json(connectedRealms)
@@ -35,7 +33,7 @@ export const fetchMythicLeaderboardByDungeonAndPeriod = async (req: Request, res
         })
         .finally(() => {
             console.timeEnd(
-                `Fetching leaderboard for ${dungeonMap.get(dungeonId)} for period ${period} for connected realm ${connectedRealmId}`
+                `Fetching leaderboard for ${dungeonName} for period ${period} for connected realm ${connectedRealmId}`
             )
         })
 }
@@ -44,9 +42,9 @@ export const fetchCurrentMythicLeaderboardDungeonByDungeon = async (req: Request
     const connectedRealmId = parseInt(req.params.connectedRealmId)
     const dungeonId = parseInt(req.params.dungeonId)
     const currentPeriod = await getCurrentPeriod()
-    const dungeonMap = getDungeonMapByPeriod(currentPeriod)
+    const dungeonName = getDungeonById(dungeonId as DungeonId).name
     console.time(
-        `Fetching leaderboard for ${dungeonMap.get(dungeonId)} for the current period for connected realm ${connectedRealmId}`
+        `Fetching leaderboard for ${dungeonName} for the current period for connected realm ${connectedRealmId}`
     )
     return getMythicLeaderboardByDungeonAndPeriod(connectedRealmId, dungeonId, currentPeriod)
         .then((connectedRealms) => {
@@ -57,7 +55,7 @@ export const fetchCurrentMythicLeaderboardDungeonByDungeon = async (req: Request
         })
         .finally(() => {
             console.timeEnd(
-                `Fetching leaderboard for ${dungeonMap.get(dungeonId)} for the current period for connected realm ${connectedRealmId}`
+                `Fetching leaderboard for ${dungeonName} for the current period for connected realm ${connectedRealmId}`
             )
         })
 }

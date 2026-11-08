@@ -1,14 +1,15 @@
 import { AppShell as MantineAppShell, Burger, Card, Container, Group, Stack, Title } from '@mantine/core'
 import { useDisclosure, useHeadroom } from '@mantine/hooks'
-import { FC, Suspense } from 'react'
-import { Outlet, useNavigate } from 'react-router'
+import type { FC } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 import { Navbar } from './Navbar.tsx'
-import { ErrorBoundary } from 'react-error-boundary'
+import DataBoundary from './DataBoundary.tsx'
 import { darkAccent, lightShade, lightText } from '../utils/constants.ts'
 
 const AppShell: FC = () => {
     const [opened, { toggle }] = useDisclosure()
     const navigate = useNavigate()
+    const location = useLocation()
     const pinned = useHeadroom({ fixedAt: 60 })
 
     return (
@@ -63,10 +64,12 @@ const AppShell: FC = () => {
             </MantineAppShell.Navbar>
 
             <MantineAppShell.Main>
-                <Stack justify={'space-between'} style={{ height: 'calc(100dvh - 84px)' }}>
-                    <ErrorBoundary fallback={<Title>Something went wrong</Title>}>
-                        <Suspense fallback={<Title>Loading...</Title>}>{<Outlet />}</Suspense>
-                    </ErrorBoundary>
+                <Stack justify={'space-between'} style={{ minHeight: 'calc(100dvh - 84px)' }}>
+                    <Container w="100%" maw={1100} px={0}>
+                        <DataBoundary resetKeys={[location.pathname]}>
+                            <Outlet />
+                        </DataBoundary>
+                    </Container>
                     <Container mih={40} mt={10} maw={580}>
                         <Title c={darkAccent} size={'xs'} ta={'center'}>
                             © {new Date().getFullYear()} Key Level Insights - This site is still under development, and
