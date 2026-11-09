@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="0" author="Harry Carr">
+        <createTable tableName="runs">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="dungeon" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="period" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fingerprint" type="nvarchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <createTable tableName="characters">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="realm" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="region" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="character_specs">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="character_id" type="bigint">
+                <constraints nullable="false" referencedTableName="characters" referencedColumnNames="id" foreignKeyName="character_specs_character_id_fkey"/>
+            </column>
+            <column name="spec" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="double" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="run_participants">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="run_id" type="bigint">
+                <constraints nullable="false" referencedTableName="runs" referencedColumnNames="id" foreignKeyName="run_participants_run_id_fkey"/>
+            </column>
+            <column name="character_spec_id" type="bigint">
+                <constraints nullable="false" referencedTableName="character_specs" referencedColumnNames="id" foreignKeyName="run_participants_character_spec_id_fkey"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="characters" columnNames="name, realm, region" />
+        <addUniqueConstraint tableName="character_specs" columnNames="character_id, spec" />
+        <addUniqueConstraint tableName="run_participants" columnNames="run_id, character_spec_id" />
+    </changeSet>
+</databaseChangeLog>
