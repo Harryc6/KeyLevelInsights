@@ -1,13 +1,13 @@
-package com.kli.backend.blizzard.leaderboards;
+package com.kli.backend.blizzard.leaderboards.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record Realm(
+public record AffixInfo(
         @JsonProperty("key")
         BlizzardHref key,
+        @JsonProperty("name")
+        String name,
         @JsonProperty("id")
-        int id,
-        @JsonProperty("slug")
-        String slug
+        int id
 ) {
 }

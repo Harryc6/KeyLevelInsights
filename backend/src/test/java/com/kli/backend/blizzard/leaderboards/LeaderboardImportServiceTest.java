@@ -1,5 +1,6 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.leaderboards.dto.*;
 import com.kli.backend.runs.Run;
 import com.kli.backend.runs.RunRepository;
 import jakarta.validation.ConstraintViolationException;

@@ -1,4 +1,4 @@
-package com.kli.backend.blizzard.leaderboards;
+package com.kli.backend.blizzard.leaderboards.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

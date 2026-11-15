@@ -1,5 +1,8 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.leaderboards.dto.DungeonGroup;
+import com.kli.backend.blizzard.leaderboards.dto.GroupMember;
+import com.kli.backend.blizzard.leaderboards.dto.LeaderboardDetails;
 import com.kli.backend.characters.Character;
 import com.kli.backend.characters.CharacterRepository;
 import com.kli.backend.characters.CharacterSpec;

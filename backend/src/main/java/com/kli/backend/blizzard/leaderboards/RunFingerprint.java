@@ -1,5 +1,7 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.leaderboards.dto.DungeonGroup;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

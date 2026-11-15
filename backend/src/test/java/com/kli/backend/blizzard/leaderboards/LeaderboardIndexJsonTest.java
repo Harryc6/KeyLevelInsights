@@ -1,7 +1,7 @@
 package com.kli.backend.blizzard.leaderboards;
 
-import com.kli.backend.blizzard.leaderboards.LeaderboardCurrent;
-import com.kli.backend.blizzard.leaderboards.LeaderboardIndex;
+import com.kli.backend.blizzard.leaderboards.dto.LeaderboardCurrent;
+import com.kli.backend.blizzard.leaderboards.dto.LeaderboardIndex;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
