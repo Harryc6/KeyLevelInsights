@@ -77,4 +77,11 @@
         <addUniqueConstraint tableName="character_specs" columnNames="character_id, spec" />
         <addUniqueConstraint tableName="run_participants" columnNames="run_id, character_spec_id" />
     </changeSet>
+    <changeSet id="1" author="Harry Carr">
+        <sql>
+            ALTER TABLE runs
+            ALTER COLUMN duration TYPE interval
+            USING (duration * INTERVAL '1 millisecond')
+        </sql>
+    </changeSet>
 </databaseChangeLog>

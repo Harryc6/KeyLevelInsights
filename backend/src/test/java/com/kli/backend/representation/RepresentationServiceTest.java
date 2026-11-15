@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +51,8 @@ public class RepresentationServiceTest {
     @BeforeEach
     void generateData() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
-        Run run = new Run(16359, 20, 1088, 480.9, 1933651, "eu", dateTime, "ABCDEFG");
+        Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
+        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
         Run savedRun = runRepository.save(run);
         Character character = new Character("Ekirn", "emerald-dream", "eu");
         Character savedCharacter = characterRepository.save(character);
@@ -141,8 +144,9 @@ public class RepresentationServiceTest {
 
     private void saveRun(String fingerprint, int level, int period, CharacterSpec... participants) {
         OffsetDateTime completed = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
+        Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
         Run run = runRepository.save(new Run(
-                16359, level, period, 480.9, 1933651, "eu", completed, fingerprint
+                16359, level, period, 480.9, duration, "eu", completed, fingerprint
         ));
         for (CharacterSpec participant : participants) {
             runParticipantRepository.save(new RunParticipant(run, participant));

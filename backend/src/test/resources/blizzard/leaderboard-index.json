@@ -1,0 +1,65 @@
+{
+  "_links": {
+    "self": {
+      "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/?namespace=dynamic-eu"
+    }
+  },
+  "current_leaderboards": [
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/249/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Kings' Rest",
+      "id": 249
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/250/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Temple of Sethraliss",
+      "id": 250
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/399/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Ruby Life Pools",
+      "id": 399
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/584/period/1089?namespace=dynamic-eu"
+      },
+      "name": "The Blinding Vale",
+      "id": 584
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/585/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Voidscar Arena",
+      "id": 585
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/586/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Den of Nalorakk",
+      "id": 586
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/587/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Murder Row",
+      "id": 587
+    },
+    {
+      "key": {
+        "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/588/period/1089?namespace=dynamic-eu"
+      },
+      "name": "Altar of Fangs",
+      "id": 588
+    }
+  ]
+}

@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +85,8 @@ public class PersistenceIntegrationTest {
     @Test
     void savesAndReloadsRun() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
-        Run run = new Run(16359, 20, 1088, 480.9, 1933651, "eu", dateTime, "ABCDEFG");
+        Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
+        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
         Run saved = runRepository.saveAndFlush(run);
 
         Long id = saved.getId();
@@ -96,7 +100,7 @@ public class PersistenceIntegrationTest {
         assertEquals(20, reloaded.getLevel());
         assertEquals(1088, reloaded.getPeriod());
         assertEquals(480.9, reloaded.getRating());
-        assertEquals(1933651, reloaded.getDuration());
+        assertEquals(duration, reloaded.getDuration());
         assertEquals("eu", reloaded.getRegion());
         assertEquals(dateTime, reloaded.getCompleted());
         assertEquals("ABCDEFG", reloaded.getFingerprint());
@@ -105,7 +109,8 @@ public class PersistenceIntegrationTest {
     @Test
     void savesAndReloadsRunParticipant() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
-        Run run = new Run(16359, 20, 1088, 480.9, 1933651, "eu", dateTime, "ABCDEFG");
+        Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
+        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
         Run savedRun = runRepository.saveAndFlush(run);
         Character character = new Character("Ekirn", "emerald-dream", "eu");
         Character savedCharacter = characterRepository.saveAndFlush(character);
@@ -126,7 +131,7 @@ public class PersistenceIntegrationTest {
         assertEquals(20, reloaded.getRun().getLevel());
         assertEquals(1088, reloaded.getRun().getPeriod());
         assertEquals(480.9, reloaded.getRun().getRating());
-        assertEquals(1933651, reloaded.getRun().getDuration());
+        assertEquals(duration, reloaded.getRun().getDuration());
         assertEquals("eu", reloaded.getRun().getRegion());
         assertEquals(dateTime, reloaded.getRun().getCompleted());
         assertEquals("ABCDEFG", reloaded.getRun().getFingerprint());

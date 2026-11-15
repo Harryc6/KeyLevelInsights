@@ -3,7 +3,10 @@ package com.kli.backend.runs;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -31,8 +34,9 @@ public class Run {
     private Double rating;
 
     @NotNull
+    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     @Column(name = "duration", nullable = false)
-    private Integer duration;
+    private Duration duration;
 
     @NotBlank
     @Column(name = "region", nullable = false, length = Integer.MAX_VALUE)
@@ -50,7 +54,7 @@ public class Run {
 
     }
 
-    public Run(Integer dungeon, Integer level, Integer period, Double rating, Integer duration, String region, OffsetDateTime completed, String fingerprint) {
+    public Run(Integer dungeon, Integer level, Integer period, Double rating, Duration duration, String region, OffsetDateTime completed, String fingerprint) {
         this.dungeon = dungeon;
         this.level = level;
         this.period = period;
@@ -97,11 +101,11 @@ public class Run {
         this.rating = rating;
     }
 
-    public Integer getDuration() {
+    public Duration getDuration() {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
+    public void setDuration(Duration duration) {
         this.duration = duration;
     }
 
