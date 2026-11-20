@@ -1,5 +1,6 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.leaderboards.dto.*;
 import com.kli.backend.runs.Run;
 import com.kli.backend.runs.RunRepository;
@@ -83,24 +84,24 @@ class LeaderboardImportServiceTest {
     void persistsRunMeasurementsAndEveryMembersRealmRegionAndSpecialization() {
         DungeonGroup group = group(0, party());
 
-        importGroups("eu", group);
+        importGroups(Region.EU, group);
 
-        Run run = storedRun(group, "eu");
+        Run run = storedRun(group, Region.EU);
         assertEquals(DUNGEON, run.getDungeon());
         assertEquals(PERIOD, run.getPeriod());
         assertEquals(20, run.getLevel());
         assertEquals(488.3713, run.getRating(), 0.000001);
         assertEquals(DURATION, run.getDuration());
         assertEquals(COMPLETED, run.getCompleted().toInstant());
-        assertEquals("eu", run.getRegion());
+        assertEquals(Region.EU, run.getRegion());
         assertCounts(1, 5, 5, 5);
-        assertParty(run, group.members(), "eu");
+        assertParty(run, group.members(), Region.EU);
     }
 
     @Test
     void reusesCharactersAndSpecsAcrossRunsButKeepsRunTimeSpecializationsSeparate() {
         DungeonGroup first = group(0, party());
-        importGroups("eu", first);
+        importGroups(Region.EU, first);
         List<Map<String, Object>> originalCharacters = snapshot().characters();
         List<Map<String, Object>> originalSpecs = snapshot().specs();
 
@@ -108,60 +109,60 @@ class LeaderboardImportServiceTest {
         switchedParty.set(2, member("Мейронигодх", 103, 72));
         DungeonGroup second = group(1, switchedParty);
         DungeonGroup third = group(2, switchedParty);
-        importGroups("eu", second, third);
+        importGroups(Region.EU, second, third);
 
         DatabaseState after = snapshot();
         assertEquals(originalCharacters, after.characters());
         assertEquals(originalSpecs, after.specs().subList(0, originalSpecs.size()));
         assertCounts(3, 5, 6, 15);
-        assertParty(storedRun(first, "eu"), first.members(), "eu");
-        assertParty(storedRun(second, "eu"), second.members(), "eu");
-        assertParty(storedRun(third, "eu"), third.members(), "eu");
+        assertParty(storedRun(first, Region.EU), first.members(), Region.EU);
+        assertParty(storedRun(second, Region.EU), second.members(), Region.EU);
+        assertParty(storedRun(third, Region.EU), third.members(), Region.EU);
     }
 
     @Test
     void skipsRepeatedAndReorderedRunsWithoutSkippingLaterNewCompletions() {
         DungeonGroup first = group(0, party());
-        importGroups("eu", first);
+        importGroups(Region.EU, first);
         DatabaseState original = snapshot();
 
-        importGroups("eu", first);
+        importGroups(Region.EU, first);
         assertEquals(original, snapshot());
 
         DungeonGroup reordered = new DungeonGroup(
                 99, first.duration(), first.completedTimestamp(), first.level(),
                 first.members().reversed(), first.mythicRating());
-        importGroups("eu", reordered);
+        importGroups(Region.EU, reordered);
         assertEquals(original, snapshot());
 
         DungeonGroup next = group(1, party());
-        importGroups("eu", reordered, next);
+        importGroups(Region.EU, reordered, next);
 
         assertCounts(2, 5, 5, 10);
         assertEquals(original.runs().getFirst(), snapshot().runs().getFirst());
-        assertParty(storedRun(next, "eu"), next.members(), "eu");
+        assertParty(storedRun(next, Region.EU), next.members(), Region.EU);
     }
 
     @Test
     void keepsMatchingCharacterAddressesInDifferentRegionsSeparate() {
         DungeonGroup group = group(0, party());
-        importGroups("eu", group);
-        importGroups("us", group);
+        importGroups(Region.EU, group);
+        importGroups(Region.US, group);
 
-        Run europeanRun = storedRun(group, "eu");
-        Run americanRun = storedRun(group, "us");
+        Run europeanRun = storedRun(group, Region.EU);
+        Run americanRun = storedRun(group, Region.US);
         assertNotEquals(europeanRun.getId(), americanRun.getId());
-        assertEquals("eu", europeanRun.getRegion());
-        assertEquals("us", americanRun.getRegion());
+        assertEquals(Region.EU, europeanRun.getRegion());
+        assertEquals(Region.US, americanRun.getRegion());
         assertCounts(2, 10, 10, 10);
-        assertParty(europeanRun, group.members(), "eu");
-        assertParty(americanRun, group.members(), "us");
+        assertParty(europeanRun, group.members(), Region.EU);
+        assertParty(americanRun, group.members(), Region.US);
     }
 
     @Test
     void rollsBackAllNewRecordsOnFailureWithoutRemovingPreviouslyCommittedData() {
         DungeonGroup existing = group(0, party());
-        importGroups("eu", existing);
+        importGroups(Region.EU, existing);
         DatabaseState before = snapshot();
 
         List<GroupMember> newcomers = List.of(
@@ -177,7 +178,7 @@ class LeaderboardImportServiceTest {
         DungeonGroup malformedRun = group(2, malformedParty);
 
         assertThrows(ConstraintViolationException.class,
-                () -> importGroups("eu", validNewRun, malformedRun));
+                () -> importGroups(Region.EU, validNewRun, malformedRun));
 
         // JDBC reads committed database state, not Hibernate's first-level cache.
         assertEquals(before, snapshot());
@@ -203,7 +204,7 @@ class LeaderboardImportServiceTest {
                 COMPLETED.plusMillis(sequence), 20, members, new MythicRating(null, 488.3713));
     }
 
-    private void importGroups(String region, DungeonGroup... groups) {
+    private void importGroups(Region region, DungeonGroup... groups) {
         for (DungeonGroup group : groups) {
             fingerprints.add(RunFingerprint.generateFingerprint(group, region, DUNGEON, PERIOD));
         }
@@ -214,12 +215,12 @@ class LeaderboardImportServiceTest {
         importService.importLeaderboard(leaderboard, region);
     }
 
-    private Run storedRun(DungeonGroup group, String region) {
+    private Run storedRun(DungeonGroup group, Region region) {
         return runRepository.findByFingerprint(
                 RunFingerprint.generateFingerprint(group, region, DUNGEON, PERIOD)).orElseThrow();
     }
 
-    private void assertParty(Run run, List<GroupMember> members, String region) {
+    private void assertParty(Run run, List<GroupMember> members, Region region) {
         List<Participant> actual = jdbc.query("""
                 SELECT c.name, c.realm, c.region, cs.spec
                 FROM run_participants rp
@@ -231,7 +232,7 @@ class LeaderboardImportServiceTest {
                         rs.getString("region"), rs.getInt("spec")));
         Set<Participant> expected = members.stream()
                 .map(member -> new Participant(member.profile().name(), member.profile().realm().slug(),
-                        region, member.spec().id()))
+                        region.toString(), member.spec().id()))
                 .collect(Collectors.toSet());
         assertEquals(members.size(), actual.size());
         assertEquals(expected, new HashSet<>(actual));

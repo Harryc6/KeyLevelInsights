@@ -1,5 +1,6 @@
 package com.kli.backend.representation;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.characters.Character;
 import com.kli.backend.characters.CharacterRepository;
 import com.kli.backend.characters.CharacterSpec;
@@ -52,9 +53,9 @@ public class RepresentationServiceTest {
     void generateData() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
         Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
-        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
+        Run run = new Run(16359, 20, 1088, 480.9, duration, Region.EU, dateTime, "ABCDEFG");
         Run savedRun = runRepository.save(run);
-        Character character = new Character("Ekirn", "emerald-dream", "eu");
+        Character character = new Character("Ekirn", "emerald-dream", Region.EU);
         Character savedCharacter = characterRepository.save(character);
         CharacterSpec characterSpec = new CharacterSpec(savedCharacter, 268);
         CharacterSpec savedSpec = characterSpecRepository.save(characterSpec);
@@ -138,7 +139,7 @@ public class RepresentationServiceTest {
     }
 
     private CharacterSpec saveCharacterSpec(String name, int spec) {
-        Character character = characterRepository.save(new Character(name, "emerald-dream", "eu"));
+        Character character = characterRepository.save(new Character(name, "emerald-dream", Region.EU));
         return characterSpecRepository.save(new CharacterSpec(character, spec));
     }
 
@@ -146,7 +147,7 @@ public class RepresentationServiceTest {
         OffsetDateTime completed = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
         Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
         Run run = runRepository.save(new Run(
-                16359, level, period, 480.9, duration, "eu", completed, fingerprint
+                16359, level, period, 480.9, duration, Region.EU, completed, fingerprint
         ));
         for (CharacterSpec participant : participants) {
             runParticipantRepository.save(new RunParticipant(run, participant));

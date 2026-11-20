@@ -1,5 +1,6 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.leaderboards.dto.DungeonGroup;
 import com.kli.backend.blizzard.leaderboards.dto.GroupMember;
 import com.kli.backend.blizzard.leaderboards.dto.LeaderboardDetails;
@@ -37,7 +38,7 @@ public class LeaderboardImportService {
     }
 
     @Transactional
-    public void importLeaderboard(LeaderboardDetails leaderboard, String region) {
+    public void importLeaderboard(LeaderboardDetails leaderboard, Region region) {
         int dungeonId = leaderboard.dungeonId();
         int period = leaderboard.period();
         List<DungeonGroup> groups = leaderboard.groups();

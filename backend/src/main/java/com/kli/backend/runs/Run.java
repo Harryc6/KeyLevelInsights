@@ -1,5 +1,6 @@
 package com.kli.backend.runs;
 
+import com.kli.backend.blizzard.Region;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,9 +39,10 @@ public class Run {
     @Column(name = "duration", nullable = false)
     private Duration duration;
 
-    @NotBlank
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "region", nullable = false, length = Integer.MAX_VALUE)
-    private String region;
+    private Region region;
 
     @NotNull
     @Column(name = "completed", nullable = false)
@@ -54,7 +56,7 @@ public class Run {
 
     }
 
-    public Run(Integer dungeon, Integer level, Integer period, Double rating, Duration duration, String region, OffsetDateTime completed, String fingerprint) {
+    public Run(Integer dungeon, Integer level, Integer period, Double rating, Duration duration, Region region, OffsetDateTime completed, String fingerprint) {
         this.dungeon = dungeon;
         this.level = level;
         this.period = period;
@@ -109,11 +111,11 @@ public class Run {
         this.duration = duration;
     }
 
-    public String getRegion() {
+    public Region getRegion() {
         return region;
     }
 
-    public void setRegion(String region) {
+    public void setRegion(Region region) {
         this.region = region;
     }
 

@@ -1,5 +1,6 @@
 package com.kli.backend;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.characters.Character;
 import com.kli.backend.characters.CharacterRepository;
 import com.kli.backend.characters.CharacterSpec;
@@ -46,7 +47,7 @@ public class PersistenceIntegrationTest {
 
     @Test
     void savesAndReloadsCharacter() {
-        Character character = new Character("Ekirn", "emerald-dream", "eu");
+        Character character = new Character("Ekirn", "emerald-dream", Region.EU);
         Character saved = characterRepository.saveAndFlush(character);
 
         Long id = saved.getId();
@@ -58,12 +59,12 @@ public class PersistenceIntegrationTest {
 
         assertEquals("Ekirn", reloaded.getName());
         assertEquals("emerald-dream", reloaded.getRealm());
-        assertEquals("eu", reloaded.getRegion());
+        assertEquals(Region.EU, reloaded.getRegion());
     }
 
     @Test
     void savesAndReloadsCharacterSpec() {
-        Character character = new Character("Ekirn", "emerald-dream", "eu");
+        Character character = new Character("Ekirn", "emerald-dream", Region.EU);
         Character savedCharacter = characterRepository.saveAndFlush(character);
         CharacterSpec characterSpec = new CharacterSpec(savedCharacter, 268);
         CharacterSpec saved = characterSpecRepository.saveAndFlush(characterSpec);
@@ -79,14 +80,14 @@ public class PersistenceIntegrationTest {
         assertEquals(0, reloaded.getRating());
         assertEquals("Ekirn", reloaded.getCharacter().getName());
         assertEquals("emerald-dream", reloaded.getCharacter().getRealm());
-        assertEquals("eu", reloaded.getCharacter().getRegion());
+        assertEquals(Region.EU, reloaded.getCharacter().getRegion());
     }
 
     @Test
     void savesAndReloadsRun() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
         Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
-        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
+        Run run = new Run(16359, 20, 1088, 480.9, duration, Region.EU, dateTime, "ABCDEFG");
         Run saved = runRepository.saveAndFlush(run);
 
         Long id = saved.getId();
@@ -101,7 +102,7 @@ public class PersistenceIntegrationTest {
         assertEquals(1088, reloaded.getPeriod());
         assertEquals(480.9, reloaded.getRating());
         assertEquals(duration, reloaded.getDuration());
-        assertEquals("eu", reloaded.getRegion());
+        assertEquals(Region.EU, reloaded.getRegion());
         assertEquals(dateTime, reloaded.getCompleted());
         assertEquals("ABCDEFG", reloaded.getFingerprint());
     }
@@ -110,9 +111,9 @@ public class PersistenceIntegrationTest {
     void savesAndReloadsRunParticipant() {
         OffsetDateTime dateTime = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
         Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
-        Run run = new Run(16359, 20, 1088, 480.9, duration, "eu", dateTime, "ABCDEFG");
+        Run run = new Run(16359, 20, 1088, 480.9, duration, Region.EU, dateTime, "ABCDEFG");
         Run savedRun = runRepository.saveAndFlush(run);
-        Character character = new Character("Ekirn", "emerald-dream", "eu");
+        Character character = new Character("Ekirn", "emerald-dream", Region.EU);
         Character savedCharacter = characterRepository.saveAndFlush(character);
         CharacterSpec characterSpec = new CharacterSpec(savedCharacter, 268);
         CharacterSpec savedSpec = characterSpecRepository.saveAndFlush(characterSpec);
@@ -132,14 +133,14 @@ public class PersistenceIntegrationTest {
         assertEquals(1088, reloaded.getRun().getPeriod());
         assertEquals(480.9, reloaded.getRun().getRating());
         assertEquals(duration, reloaded.getRun().getDuration());
-        assertEquals("eu", reloaded.getRun().getRegion());
+        assertEquals(Region.EU, reloaded.getRun().getRegion());
         assertEquals(dateTime, reloaded.getRun().getCompleted());
         assertEquals("ABCDEFG", reloaded.getRun().getFingerprint());
         assertEquals(268, reloaded.getCharacterSpec().getSpec());
         assertEquals(0, reloaded.getCharacterSpec().getRating());
         assertEquals("Ekirn", reloaded.getCharacterSpec().getCharacter().getName());
         assertEquals("emerald-dream", reloaded.getCharacterSpec().getCharacter().getRealm());
-        assertEquals("eu", reloaded.getCharacterSpec().getCharacter().getRegion());
+        assertEquals(Region.EU, reloaded.getCharacterSpec().getCharacter().getRegion());
     }
 
 }

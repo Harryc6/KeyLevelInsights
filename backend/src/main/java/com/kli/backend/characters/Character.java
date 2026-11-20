@@ -1,7 +1,9 @@
 package com.kli.backend.characters;
 
+import com.kli.backend.blizzard.Region;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "characters")
@@ -20,15 +22,16 @@ public class Character {
     @Column(name = "realm", nullable = false, length = Integer.MAX_VALUE)
     private String realm;
 
-    @NotBlank
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "region", nullable = false, length = Integer.MAX_VALUE)
-    private String region;
+    private Region region;
 
     public Character() {
 
     }
 
-    public Character(String name, String realm, String region) {
+    public Character(String name, String realm, Region region) {
         this.name = name;
         this.realm = realm;
         this.region = region;
@@ -54,11 +57,11 @@ public class Character {
         this.realm = realm;
     }
 
-    public String getRegion() {
+    public Region getRegion() {
         return region;
     }
 
-    public void setRegion(String region) {
+    public void setRegion(Region region) {
         this.region = region;
     }
 

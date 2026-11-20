@@ -1,5 +1,6 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.leaderboards.dto.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,23 +22,23 @@ class RunFingerprintTest {
 
     @Test
     void equivalentGroupInstancesProduceTheSameFingerprint() {
-        String expected = RunFingerprint.generateFingerprint(sampleGroup(), "eu", 249, 1089);
+        String expected = RunFingerprint.generateFingerprint(sampleGroup(), Region.EU, 249, 1089);
 
-        assertEquals(expected, RunFingerprint.generateFingerprint(sampleGroup(), "eu", 249, 1089));
+        assertEquals(expected, RunFingerprint.generateFingerprint(sampleGroup(), Region.EU, 249, 1089));
     }
 
     @Test
     void memberOrderDoesNotChangeTheFingerprint() {
         DungeonGroup group = sampleGroup();
-        String expected = RunFingerprint.generateFingerprint(group, "eu", 249, 1089);
+        String expected = RunFingerprint.generateFingerprint(group, Region.EU, 249, 1089);
         List<GroupMember> members = group.members();
         DungeonGroup reversed = withMembers(group, members.reversed());
         DungeonGroup rotated = withMembers(group, List.of(
                 members.get(2), members.get(3), members.get(4), members.get(0), members.get(1)
         ));
 
-        assertEquals(expected, RunFingerprint.generateFingerprint(reversed, "eu", 249, 1089));
-        assertEquals(expected, RunFingerprint.generateFingerprint(rotated, "eu", 249, 1089));
+        assertEquals(expected, RunFingerprint.generateFingerprint(reversed, Region.EU, 249, 1089));
+        assertEquals(expected, RunFingerprint.generateFingerprint(rotated, Region.EU, 249, 1089));
     }
 
     @Test
@@ -49,23 +50,23 @@ class RunFingerprintTest {
         );
 
         assertEquals(
-                RunFingerprint.generateFingerprint(group, "eu", 249, 1089),
-                RunFingerprint.generateFingerprint(rankedElsewhere, "eu", 249, 1089)
+                RunFingerprint.generateFingerprint(group, Region.EU, 249, 1089),
+                RunFingerprint.generateFingerprint(rankedElsewhere, Region.EU, 249, 1089)
         );
     }
 
     @ParameterizedTest(name = "Different context: {0}/{1}/{2}")
     @CsvSource({
-            "us, 249, 1089",
-            "eu, 250, 1089",
-            "eu, 249, 1090"
+            "US, 249, 1089",
+            "EU, 250, 1089",
+            "EU, 249, 1090"
     })
     void regionDungeonAndPeriodDistinguishRuns(String region, int dungeonId, int period) {
         DungeonGroup group = sampleGroup();
 
         assertNotEquals(
-                RunFingerprint.generateFingerprint(group, "eu", 249, 1089),
-                RunFingerprint.generateFingerprint(group, region, dungeonId, period)
+                RunFingerprint.generateFingerprint(group, Region.EU, 249, 1089),
+                RunFingerprint.generateFingerprint(group, Region.valueOf(region), dungeonId, period)
         );
     }
 
@@ -73,8 +74,8 @@ class RunFingerprintTest {
     @MethodSource("changedRunMeasurements")
     void runMeasurementsDistinguishCompletions(String field, DungeonGroup changed) {
         assertNotEquals(
-                RunFingerprint.generateFingerprint(sampleGroup(), "eu", 249, 1089),
-                RunFingerprint.generateFingerprint(changed, "eu", 249, 1089),
+                RunFingerprint.generateFingerprint(sampleGroup(), Region.EU, 249, 1089),
+                RunFingerprint.generateFingerprint(changed, Region.EU, 249, 1089),
                 field
         );
     }
@@ -101,8 +102,8 @@ class RunFingerprintTest {
     @MethodSource("changedMemberAddresses")
     void memberAddressesDistinguishParties(String field, DungeonGroup changed) {
         assertNotEquals(
-                RunFingerprint.generateFingerprint(sampleGroup(), "eu", 249, 1089),
-                RunFingerprint.generateFingerprint(changed, "eu", 249, 1089),
+                RunFingerprint.generateFingerprint(sampleGroup(), Region.EU, 249, 1089),
+                RunFingerprint.generateFingerprint(changed, Region.EU, 249, 1089),
                 field
         );
     }
@@ -132,8 +133,8 @@ class RunFingerprintTest {
         DungeonGroup group = sampleGroup();
         // Without separators, dungeon/period pairs 12/34 and 1/234 both become "1234".
         assertNotEquals(
-                RunFingerprint.generateFingerprint(group, "eu", 12, 34),
-                RunFingerprint.generateFingerprint(group, "eu", 1, 234)
+                RunFingerprint.generateFingerprint(group, Region.EU, 12, 34),
+                RunFingerprint.generateFingerprint(group, Region.EU, 1, 234)
         );
     }
 

@@ -1,5 +1,6 @@
 package com.kli.backend.blizzard.leaderboards;
 
+import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.leaderboards.dto.DungeonGroup;
 
 import java.nio.charset.StandardCharsets;
@@ -17,13 +18,13 @@ public class RunFingerprint {
 
     }
 
-    public static String generateFingerprint(DungeonGroup group, String region, int dungeonId, int period) {
+    public static String generateFingerprint(DungeonGroup group, Region region, int dungeonId, int period) {
         String level = String.valueOf(group.level());
         String duration = group.duration().toString();
         String completedTimestamp = group.completedTimestamp().toString();
         String members = group.members().stream().map(member -> member.profile().name() + "-" +
                 member.profile().realm().slug()).sorted().collect(Collectors.joining(DELIMITER));
-        String base = buildFingerprintBase(region,
+        String base = buildFingerprintBase(region.toString(),
                 String.valueOf(dungeonId), String.valueOf(period), level, duration, completedTimestamp, members);
 
         try {
