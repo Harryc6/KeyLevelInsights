@@ -5,10 +5,14 @@ import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.leaderboards.dto.LeaderboardCurrent;
 import com.kli.backend.blizzard.leaderboards.dto.LeaderboardDetails;
 import com.kli.backend.blizzard.leaderboards.dto.LeaderboardIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LeaderboardCollectionService {
+
+    private static final Logger log = LoggerFactory.getLogger(LeaderboardCollectionService.class);
 
     private final LeaderboardClient client;
 
@@ -24,12 +28,25 @@ public class LeaderboardCollectionService {
 
     public void updateLeaderboardsByRealmId(int realmId, Region region) {
         LeaderboardIndex index = client.fetchLeaderboardIndex(realmId, region);
-        index.leaderboards().forEach(leaderboardCurrent -> fetchAndImportLeaderboard(leaderboardCurrent, region));
+        ImportResult resultSum =  index.leaderboards().stream().map(leaderboardCurrent ->
+                fetchAndImportLeaderboard(leaderboardCurrent, realmId, region)).reduce(new ImportResult(0,0,0),
+                (importResult, importResult2) -> {
+            int runSum = importResult.runsAdded() + importResult2.runsAdded();
+            int characterSum = importResult.charactersAdded() + importResult2.charactersAdded();
+            int characterSpecSum = importResult.characterSpecsAdded() + importResult2.characterSpecsAdded();
+            return new ImportResult(runSum, characterSum, characterSpecSum);
+        });
+        log.info("Total imported in region={} for realm={}: runsAdded={} charactersAdded={} characterSpecsAdded={}",
+                region, realmId, resultSum.runsAdded(), resultSum.charactersAdded(), resultSum.characterSpecsAdded());
     }
 
-    private void fetchAndImportLeaderboard(LeaderboardCurrent leaderboard, Region region) {
+    private ImportResult fetchAndImportLeaderboard(LeaderboardCurrent leaderboard, int realmId, Region region) {
         LeaderboardDetails details = api.fetchFromBlizzard(leaderboard.leaderboardLink().href(), LeaderboardDetails.class);
-        importService.importLeaderboard(details, region);
+        ImportResult result = importService.importLeaderboard(details, region);
+        log.info("Imported leaderboard: region={} realm={} dungeon={} period={} runsAdded={} charactersAdded={} characterSpecsAdded={}",
+                region, realmId, details.dungeonId(), details.period(),
+                result.runsAdded(), result.charactersAdded(), result.characterSpecsAdded());
+        return result;
     }
 
 }

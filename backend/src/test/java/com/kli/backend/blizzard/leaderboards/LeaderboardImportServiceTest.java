@@ -121,6 +121,18 @@ class LeaderboardImportServiceTest {
     }
 
     @Test
+    void reportsOnlyTheNewRunAndSpecThenZeroAdditionsOnReplay() {
+        importGroups(Region.EU, group(0, party()));
+
+        List<GroupMember> switchedParty = new ArrayList<>(party());
+        switchedParty.set(2, member("Мейронигодх", 103, 72));
+        DungeonGroup newRun = group(1, switchedParty);
+
+        assertEquals(new ImportResult(1, 0, 1), importGroups(Region.EU, newRun));
+        assertEquals(new ImportResult(0, 0, 0), importGroups(Region.EU, newRun));
+    }
+
+    @Test
     void skipsRepeatedAndReorderedRunsWithoutSkippingLaterNewCompletions() {
         DungeonGroup first = group(0, party());
         importGroups(Region.EU, first);
@@ -204,7 +216,7 @@ class LeaderboardImportServiceTest {
                 COMPLETED.plusMillis(sequence), 20, members, new MythicRating(null, 488.3713));
     }
 
-    private void importGroups(Region region, DungeonGroup... groups) {
+    private ImportResult importGroups(Region region, DungeonGroup... groups) {
         for (DungeonGroup group : groups) {
             fingerprints.add(RunFingerprint.generateFingerprint(group, region, DUNGEON, PERIOD));
         }
@@ -212,7 +224,7 @@ class LeaderboardImportServiceTest {
                 null, new MapInfo("Kings' Rest", 1762), PERIOD,
                 Instant.parse("2026-11-11T04:00:00Z"), Instant.parse("2026-11-18T03:59:59Z"),
                 null, List.of(groups), List.of(), DUNGEON, "Kings' Rest");
-        importService.importLeaderboard(leaderboard, region);
+        return importService.importLeaderboard(leaderboard, region);
     }
 
     private Run storedRun(DungeonGroup group, Region region) {

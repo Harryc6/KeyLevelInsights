@@ -3,7 +3,6 @@ package com.kli.backend.blizzard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -36,7 +35,7 @@ public class BlizzardApiClient {
                 .body(responseType);
 
         if (response == null) throw new IllegalStateException("Blizzard returned no response body for " + uri);
-        log.info("Fetched {} from Blizzard at {}", responseType.getSimpleName(), localisedUri);
+        log.debug("Fetched {} from Blizzard at {}", responseType.getSimpleName(), localisedUri);
         return response;
     }
 

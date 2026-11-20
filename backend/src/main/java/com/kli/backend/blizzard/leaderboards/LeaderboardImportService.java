@@ -38,15 +38,19 @@ public class LeaderboardImportService {
     }
 
     @Transactional
-    public void importLeaderboard(LeaderboardDetails leaderboard, Region region) {
+    public ImportResult importLeaderboard(LeaderboardDetails leaderboard, Region region) {
         int dungeonId = leaderboard.dungeonId();
         int period = leaderboard.period();
         List<DungeonGroup> groups = leaderboard.groups();
 
-        groups.forEach(group -> {
+        int addedRunCount = 0;
+        int addedSpecCount = 0;
+        int addedCharCount = 0;
+
+        for (DungeonGroup group : groups) {
             String runFingerprint = RunFingerprint.generateFingerprint(group, region, dungeonId, period);
             boolean alreadyProcessed = runRepository.existsByFingerprint(runFingerprint);
-            if (alreadyProcessed) return; // Guard against re-processing already processed runs
+            if (alreadyProcessed) continue; // Guard against re-processing already processed runs
             Run run = runRepository.save(new Run(
                     dungeonId,
                     group.level(),
@@ -57,22 +61,26 @@ public class LeaderboardImportService {
                     group.completedTimestamp().atOffset(ZoneOffset.UTC),
                     runFingerprint
             ));
+            addedRunCount++;
 
             for (GroupMember member : group.members()) {
                 Optional<Character> maybeCharacter = charRepository.findByNameAndRealmAndRegion(
                         member.profile().name(), member.profile().realm().slug(), region);
+                if (maybeCharacter.isEmpty()) addedCharCount++;
                 Character character = maybeCharacter.orElseGet(() -> charRepository.save(new Character(
                         member.profile().name(), member.profile().realm().slug(), region)));
 
                 Optional<CharacterSpec> maybeSpec = specRepository.findByCharacterAndSpec(
                         character, member.spec().id());
+                if (maybeSpec.isEmpty()) addedSpecCount++;
                 CharacterSpec spec = maybeSpec.orElseGet(() -> specRepository.save(new CharacterSpec(
                         character, member.spec().id())));
 
                 // No need to lookup, since run has just been created
                 participantRepository.save(new RunParticipant(run, spec));
             }
-        });
+        }
+        return new ImportResult(addedRunCount, addedCharCount, addedSpecCount);
     }
 
 
