@@ -16,17 +16,21 @@ import static org.springframework.security.oauth2.client.web.client.RequestAttri
 public class BlizzardApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(BlizzardApiClient.class);
+
     private final RestClient restClient;
 
+    private final BlizzardRequestLimiter limiter;
 
-    public BlizzardApiClient(RestClient restClient) {
+    public BlizzardApiClient(RestClient restClient, BlizzardRequestLimiter limiter) {
         this.restClient = restClient;
+        this.limiter = limiter;
     }
 
     public <T> T fetchFromBlizzard(URI uri, Class<T> responseType) {
         validateBlizzardURI(uri);
         URI localisedUri = getLocalisedUri(uri);
 
+        limiter.acquire();
         T response = restClient.get()
                 .uri(localisedUri)
                 .attributes(clientRegistrationId("blizzard"))

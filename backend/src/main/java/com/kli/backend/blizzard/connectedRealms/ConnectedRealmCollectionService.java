@@ -1,7 +1,7 @@
 package com.kli.backend.blizzard.connectedRealms;
 
 import com.kli.backend.blizzard.Region;
-import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmDetail;
+import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmDetails;
 import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmIndex;
 import com.kli.backend.blizzard.dto.BlizzardHref;
 import com.kli.backend.blizzard.leaderboards.LeaderboardCollectionService;
@@ -27,7 +27,7 @@ public class ConnectedRealmCollectionService {
         ConnectedRealmIndex index = client.fetchConnectedRealmIndex(region);
 
         for (BlizzardHref realmHref : index.realmHrefs()) {
-            ConnectedRealmDetail realm = client.fetchConnectedRealm(realmHref.href());
+            ConnectedRealmDetails realm = client.fetchConnectedRealm(realmHref.href());
             log.info("Updating connected realm: id={} region={}", realm.id(), region);
             collectionService.updateLeaderboards(realm.leaderboardHref().href(), realm.id(), region);
         }

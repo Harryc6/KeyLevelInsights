@@ -1,6 +1,6 @@
 package com.kli.backend.blizzard.connectedRealms;
 
-import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmDetail;
+import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmDetails;
 import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmIndex;
 import com.kli.backend.blizzard.dto.BlizzardHref;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class ConnectedRealmJsonTest {
     void readsTheLeaderboardIndexLinkForTheConnectedRealm() throws IOException {
         var fixture = new ClassPathResource("blizzard/connected-realm-details.json");
         try (var input = fixture.getInputStream()) {
-            var details = jsonMapper.readValue(input, ConnectedRealmDetail.class);
+            var details = jsonMapper.readValue(input, ConnectedRealmDetails.class);
             assertEquals(1080, details.id());
             assertEquals(URI.create("https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/index?namespace=dynamic-eu"),
                     details.leaderboardHref().href());

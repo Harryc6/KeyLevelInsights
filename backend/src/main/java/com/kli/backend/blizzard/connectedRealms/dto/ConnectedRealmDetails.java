@@ -6,7 +6,7 @@ import com.kli.backend.blizzard.dto.BlizzardLinks;
 
 import java.util.List;
 
-public record ConnectedRealmDetail(
+public record ConnectedRealmDetails(
         @JsonProperty("_links")
         BlizzardLinks _links,
         @JsonProperty("id")
