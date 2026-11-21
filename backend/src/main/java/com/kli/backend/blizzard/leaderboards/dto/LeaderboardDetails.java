@@ -2,6 +2,8 @@ package com.kli.backend.blizzard.leaderboards.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kli.backend.blizzard.dto.BlizzardHref;
+import com.kli.backend.blizzard.dto.BlizzardLinks;
 
 import java.time.Instant;
 import java.util.List;

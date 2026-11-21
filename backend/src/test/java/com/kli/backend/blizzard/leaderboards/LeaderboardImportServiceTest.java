@@ -133,6 +133,18 @@ class LeaderboardImportServiceTest {
     }
 
     @Test
+    void importsAnUnseenRunOnlyOnceWhenRepeatedInTheSameResponse() {
+        DungeonGroup first = group(0, party());
+        DungeonGroup reordered = group(0, first.members().reversed());
+
+        ImportResult result = importGroups(Region.EU, first, reordered);
+
+        assertEquals(new ImportResult(1, 5, 5), result);
+        assertCounts(1, 5, 5, 5);
+        assertParty(storedRun(first, Region.EU), first.members(), Region.EU);
+    }
+
+    @Test
     void skipsRepeatedAndReorderedRunsWithoutSkippingLaterNewCompletions() {
         DungeonGroup first = group(0, party());
         importGroups(Region.EU, first);

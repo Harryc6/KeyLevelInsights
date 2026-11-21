@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class LeaderboardImportService {
@@ -47,10 +46,15 @@ public class LeaderboardImportService {
         int addedSpecCount = 0;
         int addedCharCount = 0;
 
-        for (DungeonGroup group : groups) {
-            String runFingerprint = RunFingerprint.generateFingerprint(group, region, dungeonId, period);
-            boolean alreadyProcessed = runRepository.existsByFingerprint(runFingerprint);
-            if (alreadyProcessed) continue; // Guard against re-processing already processed runs
+        LinkedHashMap<String, DungeonGroup> potentiallyExistingRuns = new LinkedHashMap<>();
+        groups.forEach(group ->
+                potentiallyExistingRuns.putIfAbsent(RunFingerprint.generateFingerprint(group, region, dungeonId, period), group));
+        Set<String> existingFingerprints = runRepository.findAllByFingerprintIn(potentiallyExistingRuns.keySet());
+        for (String fingerprint : existingFingerprints) potentiallyExistingRuns.remove(fingerprint);
+
+        for (Map.Entry<String, DungeonGroup> entry : potentiallyExistingRuns.entrySet()) {
+            DungeonGroup group = entry.getValue();
+            String runFingerprint = entry.getKey();
             Run run = runRepository.save(new Run(
                     dungeonId,
                     group.level(),
@@ -70,8 +74,8 @@ public class LeaderboardImportService {
                 Character character = maybeCharacter.orElseGet(() -> charRepository.save(new Character(
                         member.profile().name(), member.profile().realm().slug(), region)));
 
-                Optional<CharacterSpec> maybeSpec = specRepository.findByCharacterAndSpec(
-                        character, member.spec().id());
+                Optional<CharacterSpec> maybeSpec = maybeCharacter.isPresent() ? specRepository.findByCharacterAndSpec(
+                        character, member.spec().id()) : Optional.empty();
                 if (maybeSpec.isEmpty()) addedSpecCount++;
                 CharacterSpec spec = maybeSpec.orElseGet(() -> specRepository.save(new CharacterSpec(
                         character, member.spec().id())));

@@ -1,0 +1,13 @@
+{
+  "_links": {
+    "self": { "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080?namespace=dynamic-eu" }
+  },
+  "id": 1080,
+  "has_queue": false,
+  "realms": [
+    { "id": 1080, "slug": "khadgar", "is_tournament": false },
+    { "id": 504, "slug": "bloodhoof", "is_tournament": false }
+  ],
+  "mythic_leaderboards": { "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/mythic-leaderboard/index?namespace=dynamic-eu" },
+  "auctions": { "href": "https://eu.api.blizzard.com/data/wow/connected-realm/1080/auctions?namespace=dynamic-eu" }
+}

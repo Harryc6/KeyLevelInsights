@@ -22,12 +22,20 @@ public class LeaderboardClient {
     public LeaderboardIndex fetchLeaderboardIndex(int realmId, Region region) {
         String path = String.format("/data/wow/connected-realm/%d/mythic-leaderboard/index", realmId);
         URI uri = api.buildUrl(path, region, Namespace.DYNAMIC, Locale.EN_GB);
+        return fetchLeaderboardIndex(uri);
+    }
+
+    public LeaderboardIndex fetchLeaderboardIndex(URI uri) {
         return api.fetchFromBlizzard(uri, LeaderboardIndex.class);
     }
 
     public LeaderboardDetails fetchLeaderboard(int realmId, int dungeonId, int period) {
         String path = String.format("/data/wow/connected-realm/%d/mythic-leaderboard/%d/period/%d", realmId, dungeonId, period);
         URI uri = api.buildUrl(path, Region.EU, Namespace.DYNAMIC, Locale.EN_GB);
+        return fetchLeaderboard(uri);
+    }
+
+    public LeaderboardDetails fetchLeaderboard(URI uri) {
         return api.fetchFromBlizzard(uri, LeaderboardDetails.class);
     }
 
