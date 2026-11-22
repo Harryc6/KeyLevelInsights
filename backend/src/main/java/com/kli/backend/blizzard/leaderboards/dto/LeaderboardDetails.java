@@ -1,9 +1,11 @@
 package com.kli.backend.blizzard.leaderboards.dto;
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kli.backend.blizzard.dto.BlizzardHref;
 import com.kli.backend.blizzard.dto.BlizzardLinks;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,6 +26,7 @@ public record LeaderboardDetails(
         @JsonProperty("connected_realm")
         BlizzardHref connectedRealmLink,
         @JsonProperty("leading_groups")
+        @JsonDeserialize(using = GroupsDeserializer.class)
         List<DungeonGroup> groups,
         @JsonProperty("keystone_affixes")
         List<Affix> affixes,

@@ -102,7 +102,7 @@ public class LeaderboardCollectionService {
         long start = System.nanoTime();
         ImportResult result = importService.importLeaderboard(details, region);
         long imported = System.nanoTime();
-        log.info("Imported leaderboard: region={} realm={} dungeon={} period={} groupsSeen={} runsAdded={} charactersAdded={} characterSpecsAdded={} importMs={}",
+        log.debug("Imported leaderboard: region={} realm={} dungeon={} period={} groupsSeen={} runsAdded={} charactersAdded={} characterSpecsAdded={} importMs={}",
                 region, realmId, details.dungeonId(), details.period(), details.groups().size(),
                 result.runsAdded(), result.charactersAdded(), result.characterSpecsAdded(),
                 TimeUnit.NANOSECONDS.toMillis(imported - start));

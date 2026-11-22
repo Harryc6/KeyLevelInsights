@@ -30,11 +30,10 @@ public class RestClientConfig {
         return new AuthorizedClientServiceOAuth2AuthorizedClientManager(registrations, authorizedClients);
     }
 
-    // TODO: Remove as this is a temporary to test functionality
     @Bean
-    @Profile("dev")
+    @Profile("force-update")
     public ApplicationRunner importAllRealmsLeaderboards(ConnectedRealmCollectionService collectionService) {
-        return _ -> collectionService.updateLeaderboards(Region.EU);
+        return _ -> collectionService.updateAllLeaderboards();
     }
 
 }

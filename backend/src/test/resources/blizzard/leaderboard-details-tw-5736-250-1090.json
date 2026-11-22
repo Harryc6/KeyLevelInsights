@@ -1,0 +1,19 @@
+{
+  "_links": {
+    "self": {"href": "https://tw.api.blizzard.com/data/wow/connected-realm/5736/mythic-leaderboard/250/period/1090?namespace=dynamic-tw"}
+  },
+  "map": {"name": "Temple of Sethraliss", "id": 1877},
+  "period": 1090,
+  "period_start_timestamp": 1795042800000,
+  "period_end_timestamp": 1795647599000,
+  "connected_realm": {"href": "https://tw.api.blizzard.com/data/wow/connected-realm/5736?namespace=dynamic-tw"},
+  "keystone_affixes": [
+    {"keystone_affix": {"key": {"href": "https://tw.api.blizzard.com/data/wow/keystone-affix/165?namespace=static-12.1.5_70077-tw"}, "name": "Lindormi's Guidance", "id": 165}, "starting_level": 0, "max_level": 5},
+    {"keystone_affix": {"key": {"href": "https://tw.api.blizzard.com/data/wow/keystone-affix/158?namespace=static-12.1.5_70077-tw"}, "name": "Xal'atath's Bargain: Voidbound", "id": 158}, "starting_level": 5, "max_level": 11},
+    {"keystone_affix": {"key": {"href": "https://tw.api.blizzard.com/data/wow/keystone-affix/9?namespace=static-12.1.5_70077-tw"}, "name": "Tyrannical", "id": 9}, "starting_level": 7},
+    {"keystone_affix": {"key": {"href": "https://tw.api.blizzard.com/data/wow/keystone-affix/10?namespace=static-12.1.5_70077-tw"}, "name": "Fortified", "id": 10}, "starting_level": 10},
+    {"keystone_affix": {"key": {"href": "https://tw.api.blizzard.com/data/wow/keystone-affix/147?namespace=static-12.1.5_70077-tw"}, "name": "Xal'atath's Guile", "id": 147}, "starting_level": 12}
+  ],
+  "map_challenge_mode_id": 250,
+  "name": "Temple of Sethraliss"
+}

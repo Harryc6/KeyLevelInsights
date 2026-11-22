@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.core.io.ClassPathResource;
+import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,8 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JsonTest
 class LeaderboardDetailsJsonTest {
@@ -123,6 +127,31 @@ class LeaderboardDetailsJsonTest {
         assertEquals(URI.create(
                 "https://eu.api.blizzard.com/data/wow/keystone-affix/10?namespace=static-12.1.5_70077-eu"
         ), fortified.affixInfo().key().href());
+    }
+
+    @Test
+    void readsAnEmptyPartyListWhenTaiwanLeaderboardOmitsLeadingGroups() throws IOException {
+        LeaderboardDetails board = jsonMapper.treeToValue(readTaiwanBoard(), LeaderboardDetails.class);
+
+        assertEquals(250, board.dungeonId());
+        assertEquals(1090, board.period());
+        assertEquals(URI.create("https://tw.api.blizzard.com/data/wow/connected-realm/5736?namespace=dynamic-tw"),
+                board.connectedRealmLink().href());
+        assertTrue(board.groups().isEmpty());
+    }
+
+    @Test
+    void rejectsExplicitNullLeadingGroupsOnTheSameTaiwanLeaderboard() throws IOException {
+        ObjectNode payload = readTaiwanBoard();
+        payload.putNull("leading_groups");
+
+        assertThrows(MismatchedInputException.class, () -> jsonMapper.treeToValue(payload, LeaderboardDetails.class));
+    }
+
+    private ObjectNode readTaiwanBoard() throws IOException {
+        try (InputStream input = new ClassPathResource("blizzard/leaderboard-details-tw-5736-250-1090.json").getInputStream()) {
+            return jsonMapper.readValue(input, ObjectNode.class);
+        }
     }
 
     private LeaderboardDetails readLeaderboard() throws IOException {

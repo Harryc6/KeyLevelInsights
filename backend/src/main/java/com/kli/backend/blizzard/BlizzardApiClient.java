@@ -29,6 +29,7 @@ public class BlizzardApiClient {
     public <T> T fetchFromBlizzard(URI uri, Class<T> responseType) {
         validateBlizzardURI(uri);
         URI localisedUri = getLocalisedUri(uri);
+        log.debug("Fetching {} from Blizzard at {}", responseType.getSimpleName(), localisedUri);
 
         limiter.acquire();
         T response = restClient.get()
@@ -53,15 +54,19 @@ public class BlizzardApiClient {
     }
 
     private static void validateBlizzardURI(URI uri) {
+        String host = uri.getHost();
+        boolean allowedHost = host != null && (host.endsWith(".api.blizzard.com") || "gateway.battlenet.com.cn".equalsIgnoreCase(host));
         if (!uri.getScheme().equalsIgnoreCase("https")) throw new IllegalArgumentException("Unexpected Blizzard API URI: " + uri);
-        if (!uri.getHost().endsWith(".api.blizzard.com")) throw new IllegalArgumentException("Unexpected Blizzard API URI: " + uri);
+        if (!allowedHost) throw new IllegalArgumentException("Unexpected Blizzard API URI: " + uri);
         if (!uri.getPath().startsWith("/data/wow/")) throw new IllegalArgumentException("Unexpected Blizzard API URI: " + uri);
     }
 
     public URI buildUrl(String path, Region region, Namespace namespace, Locale locale) {
+        String host = region + ".api.blizzard.com";
+        if (region.equals(Region.CN)) host = "gateway.battlenet.com.cn";
         return UriComponentsBuilder.newInstance()
                 .scheme("https")
-                .host(region + ".api.blizzard.com")
+                .host(host)
                 .path(path)
                 .queryParam("namespace", namespace.forRegion(region))
                 .queryParam("locale", locale)

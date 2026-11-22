@@ -87,5 +87,4 @@ public class LeaderboardImportService {
         return new ImportResult(addedRunCount, addedCharCount, addedSpecCount);
     }
 
-
 }

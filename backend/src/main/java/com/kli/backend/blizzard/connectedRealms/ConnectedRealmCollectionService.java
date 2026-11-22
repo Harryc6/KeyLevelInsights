@@ -9,6 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 @Service
 public class ConnectedRealmCollectionService {
 
@@ -23,12 +30,36 @@ public class ConnectedRealmCollectionService {
         this.collectionService = collectionService;
     }
 
-    public void updateLeaderboards(Region region) {
+    public void updateAllLeaderboards() {
+        log.debug("Starting connected realm collection");
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            Map<Region, Future<?>> tasks = new EnumMap<>(Region.class);
+
+            for (Region region : Region.values()) {
+                tasks.put(region, executor.submit(() -> updateRegionLeaderboard(region)));
+            }
+
+            for (Map.Entry<Region, Future<?>> entry : tasks.entrySet()) {
+                try {
+                    entry.getValue().get();
+                    log.info("Collection completed for region={}", entry.getKey());
+                } catch (ExecutionException e) {
+                    log.error("Collection failed for region={}", entry.getKey(), e.getCause());
+                } catch (InterruptedException e) {
+                    tasks.values().forEach(task -> task.cancel(true));
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Interrupted while waiting for regional collection", e);
+                }
+            }
+        }
+    }
+
+    public void updateRegionLeaderboard(Region region) {
         ConnectedRealmIndex index = client.fetchConnectedRealmIndex(region);
 
         for (BlizzardHref realmHref : index.realmHrefs()) {
             ConnectedRealmDetails realm = client.fetchConnectedRealm(realmHref.href());
-            log.info("Updating connected realm: id={} region={}", realm.id(), region);
+            log.debug("Updating connected realm: id={} region={}", realm.id(), region);
             collectionService.updateLeaderboards(realm.leaderboardHref().href(), realm.id(), region);
         }
 
