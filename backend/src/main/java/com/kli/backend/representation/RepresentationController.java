@@ -16,7 +16,10 @@ public class RepresentationController {
     }
 
     @GetMapping
-    public PeriodSpecFrequency getSpecFrequencyByPeriod(@RequestParam("period") int period) {
+    public PeriodSpecFrequency getSpecFrequencyByPeriod(@RequestParam("period") int period, @RequestParam(value = "dungeon", required = false) Integer dungeon) {
+        if (dungeon != null) {
+            return service.getSpecFrequencyByPeriodAndDungeon(period, dungeon);
+        }
         return service.getSpecFrequencyByPeriod(period);
     }
 

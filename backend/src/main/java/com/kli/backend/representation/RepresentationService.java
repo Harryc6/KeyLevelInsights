@@ -2,6 +2,7 @@ package com.kli.backend.representation;
 
 import com.kli.backend.runs.RunParticipantRepository;
 import com.kli.backend.runs.SpecFrequencyRow;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +19,16 @@ public class RepresentationService {
 
     public PeriodSpecFrequency getSpecFrequencyByPeriod(int period) {
         List<SpecFrequencyRow> rows = repository.findSpecFrequenciesByPeriod(period);
+        return buildPeriodSpecFrequency(period, rows);
+    }
+
+
+    public PeriodSpecFrequency getSpecFrequencyByPeriodAndDungeon(int period, int dungeon) {
+        List<SpecFrequencyRow> rows = repository.findSpecFrequenciesByPeriodAndDungeon(period, dungeon);
+        return buildPeriodSpecFrequency(period, rows);
+    }
+
+    private static @NonNull PeriodSpecFrequency buildPeriodSpecFrequency(int period, List<SpecFrequencyRow> rows) {
         List<KeyLevelSpecFrequency> keyLevelFrequencies = new ArrayList<>();
         List<SpecFrequency> specFrequencies = new ArrayList<>();
         int keyLevel = -1;
@@ -36,6 +47,5 @@ public class RepresentationService {
 
         return new PeriodSpecFrequency(period, keyLevelFrequencies);
     }
-
 
 }

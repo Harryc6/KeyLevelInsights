@@ -16,6 +16,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -23,6 +25,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -132,6 +136,32 @@ public class RepresentationServiceTest {
     }
 
     @Test
+    void filtersAppearancesByDungeonWithinTheRequestedPeriod(
+            @Autowired RepresentationController controller, @Autowired JsonMapper mapper) throws Exception {
+        CharacterSpec spec = entityManager.getReference(CharacterSpec.class, characterSpecId);
+        // The shared fixture already has one appearance at +20 in dungeon 16359 for period 1088.
+        saveRunInDungeon("dungeon-filter-second", 250, 20, 1088, spec);
+        saveRunInDungeon("dungeon-filter-third", 250, 20, 1088, spec);
+        saveRunInDungeon("dungeon-filter-other-period", 250, 20, 1089, spec);
+        flushAndClear();
+
+        var mvc = MockMvcBuilders.standaloneSetup(controller).build();
+        record Example(Integer dungeon, int expectedCount) {}
+        for (var example : List.of(new Example(null, 3), new Example(16359, 1),
+                new Example(250, 2), new Example(249, 0))) {
+            var request = get("/api/representation").param("period", "1088");
+            if (example.dungeon() != null) request.param("dungeon", example.dungeon().toString());
+            byte[] response = mvc.perform(request).andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsByteArray();
+
+            List<KeyLevelSpecFrequency> levels = example.expectedCount() == 0 ? List.of() :
+                    List.of(new KeyLevelSpecFrequency(20, List.of(new SpecFrequency(268, example.expectedCount()))));
+            assertEquals(new PeriodSpecFrequency(1088, levels), mapper.readValue(response, PeriodSpecFrequency.class),
+                    "dungeon=" + example.dungeon());
+        }
+    }
+
+    @Test
     void returnsAnEmptyReportForAPeriodWithoutParticipants() {
         PeriodSpecFrequency report = representationService.getSpecFrequencyByPeriod(1089);
 
@@ -144,10 +174,14 @@ public class RepresentationServiceTest {
     }
 
     private void saveRun(String fingerprint, int level, int period, CharacterSpec... participants) {
+        saveRunInDungeon(fingerprint, 16359, level, period, participants);
+    }
+
+    private void saveRunInDungeon(String fingerprint, int dungeon, int level, int period, CharacterSpec... participants) {
         OffsetDateTime completed = OffsetDateTime.parse("2026-10-19T22:47:49.000Z");
         Duration duration = Duration.of(1933651L, ChronoUnit.MILLIS);
         Run run = runRepository.save(new Run(
-                16359, level, period, 480.9, duration, Region.EU, completed, fingerprint
+                dungeon, level, period, 480.9, duration, Region.EU, completed, fingerprint
         ));
         for (CharacterSpec participant : participants) {
             runParticipantRepository.save(new RunParticipant(run, participant));

@@ -21,4 +21,18 @@ public interface RunParticipantRepository extends JpaRepository<RunParticipant, 
         """)
     List<SpecFrequencyRow> findSpecFrequenciesByPeriod(@Param("period") int period);
 
+    @Query("""
+        SELECT new com.kli.backend.runs.SpecFrequencyRow(
+            r.level, cs.spec, COUNT(rp)
+        )
+        FROM RunParticipant rp
+        JOIN rp.run r
+        JOIN rp.characterSpec cs
+        WHERE r.period = :period AND r.dungeon = :dungeon
+        GROUP BY r.level, cs.spec
+        ORDER BY r.level, cs.spec
+        """)
+    List<SpecFrequencyRow> findSpecFrequenciesByPeriodAndDungeon(@Param("period") int period, @Param("dungeon") int dungeon);
+
+
 }
