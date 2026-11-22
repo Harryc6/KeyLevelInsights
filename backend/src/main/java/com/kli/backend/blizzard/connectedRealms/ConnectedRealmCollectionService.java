@@ -1,20 +1,19 @@
 package com.kli.backend.blizzard.connectedRealms;
 
+import com.kli.backend.blizzard.DungeonCollectionProperties;
 import com.kli.backend.blizzard.Region;
 import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmDetails;
 import com.kli.backend.blizzard.connectedRealms.dto.ConnectedRealmIndex;
 import com.kli.backend.blizzard.dto.BlizzardHref;
+import com.kli.backend.blizzard.leaderboards.ImportResult;
 import com.kli.backend.blizzard.leaderboards.LeaderboardCollectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Service
 public class ConnectedRealmCollectionService {
@@ -25,45 +24,59 @@ public class ConnectedRealmCollectionService {
 
     private final LeaderboardCollectionService collectionService;
 
-    public ConnectedRealmCollectionService(ConnectedRealmClient client, LeaderboardCollectionService collectionService) {
+    private final DungeonCollectionProperties properties;
+
+    public ConnectedRealmCollectionService(ConnectedRealmClient client, LeaderboardCollectionService collectionService, DungeonCollectionProperties properties) {
         this.client = client;
         this.collectionService = collectionService;
+        this.properties = properties;
     }
 
     public void updateAllLeaderboards() {
-        log.debug("Starting connected realm collection");
+        log.info("Starting all realm collection");
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            Map<Region, Future<?>> tasks = new EnumMap<>(Region.class);
+            ExecutorCompletionService<ImportResult> completed = new ExecutorCompletionService<>(executor);
+            Map<Future<ImportResult>, Region> pending = new HashMap<>();
 
-            for (Region region : Region.values()) {
-                tasks.put(region, executor.submit(() -> updateRegionLeaderboard(region)));
+            for (Region region : properties.enabledRegions()) {
+                Future<ImportResult> ticket = completed.submit(() -> updateRegionLeaderboard(region));
+                pending.put(ticket, region);
             }
 
-            for (Map.Entry<Region, Future<?>> entry : tasks.entrySet()) {
-                try {
-                    entry.getValue().get();
-                    log.info("Collection completed for region={}", entry.getKey());
-                } catch (ExecutionException e) {
-                    log.error("Collection failed for region={}", entry.getKey(), e.getCause());
-                } catch (InterruptedException e) {
-                    tasks.values().forEach(task -> task.cancel(true));
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("Interrupted while waiting for regional collection", e);
-                }
-            }
+            processRegions(completed, pending);
         }
     }
 
-    public void updateRegionLeaderboard(Region region) {
-        ConnectedRealmIndex index = client.fetchConnectedRealmIndex(region);
+    private void processRegions(ExecutorCompletionService<ImportResult> completed, Map<Future<ImportResult>, Region> pending) {
 
+        try {
+            while (!pending.isEmpty()) {
+                var future = completed.take();
+                Region region = pending.remove(future);
+                try {
+                    var result = future.get();
+                    log.info("Collection complete for region={}: runsAdded={} charactersAdded={} characterSpecsAdded={}",
+                            region, result.runsAdded(), result.charactersAdded(), result.characterSpecsAdded());
+                } catch (ExecutionException e) {
+                    log.error("Collection failed for region={}", region, e.getCause());
+                }
+            }
+        } catch (InterruptedException e) {
+            pending.keySet().forEach(future -> future.cancel(true));
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for regional collection", e);
+        }
+    }
+
+    public ImportResult updateRegionLeaderboard(Region region) {
+        ConnectedRealmIndex index = client.fetchConnectedRealmIndex(region);
+        ImportResult sum = new ImportResult(0, 0, 0);
         for (BlizzardHref realmHref : index.realmHrefs()) {
             ConnectedRealmDetails realm = client.fetchConnectedRealm(realmHref.href());
             log.debug("Updating connected realm: id={} region={}", realm.id(), region);
-            collectionService.updateLeaderboards(realm.leaderboardHref().href(), realm.id(), region);
+            sum = sum.add(collectionService.updateLeaderboards(realm.leaderboardHref().href(), realm.id(), region));
         }
-
-
+        return sum;
     }
 
 }

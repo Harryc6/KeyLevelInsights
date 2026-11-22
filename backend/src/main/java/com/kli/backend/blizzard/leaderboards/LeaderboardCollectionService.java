@@ -28,25 +28,25 @@ public class LeaderboardCollectionService {
         this.importService = importService;
     }
 
-    public void updateLeaderboards(int realmId, Region region) {
+    public ImportResult updateLeaderboards(int realmId, Region region) {
         LeaderboardIndex index = client.fetchLeaderboardIndex(realmId, region);
-        processLeaderboardsUpdate(index, realmId, region);
+        return processLeaderboardsUpdate(index, realmId, region);
     }
 
-    public void updateLeaderboards(URI uri, int realmId, Region region) {
+    public ImportResult updateLeaderboards(URI uri, int realmId, Region region) {
         LeaderboardIndex index = client.fetchLeaderboardIndex(uri);
-        processLeaderboardsUpdate(index, realmId, region);
+        return processLeaderboardsUpdate(index, realmId, region);
     }
 
-    private void processLeaderboardsUpdate(LeaderboardIndex index, int realmId, Region region) {
-
+    private ImportResult processLeaderboardsUpdate(LeaderboardIndex index, int realmId, Region region) {
         ImportResult sum = new ImportResult(0, 0, 0);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             sum = importLeaderboardEntries(realmId, region, index, executor, sum);
         }
-        log.info("Total imported in region={} for realm={}: runsAdded={} charactersAdded={} characterSpecsAdded={}",
+        log.debug("Total imported in region={} for realm={}: runsAdded={} charactersAdded={} characterSpecsAdded={}",
                 region, realmId, sum.runsAdded(), sum.charactersAdded(), sum.characterSpecsAdded());
+        return sum;
     }
 
     private ImportResult importLeaderboardEntries(int realmId, Region region, LeaderboardIndex index, ExecutorService executor, ImportResult sum) {
